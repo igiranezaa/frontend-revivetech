@@ -19,8 +19,8 @@ export default function TechnicianPage() {
   }, [])
 
   function handleBack() {
-    logout()
     navigate('/', { replace: true })
+    logout()
   }
 
   function markNotifRead(id: string) {

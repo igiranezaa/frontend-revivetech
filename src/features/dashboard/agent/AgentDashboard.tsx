@@ -634,7 +634,7 @@ function AgentHeader({
               <button
                 type="button"
                 className="agent-user-menu-item agent-user-menu-item--logout"
-                onClick={() => { logout(); navigate('/', { replace: true }) }}
+                onClick={() => { navigate('/', { replace: true }); logout() }}
               >
                 <Icon d={ICONS.logout} size={14} />
                 Log out

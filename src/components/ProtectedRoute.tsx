@@ -9,7 +9,7 @@ interface Props {
 export default function ProtectedRoute({ children, role }: Props) {
   const { user } = useAuth()
 
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) return <Navigate to="/" replace />
   if (user.role !== role) return <Navigate to="/login" replace />
 
   return <>{children}</>

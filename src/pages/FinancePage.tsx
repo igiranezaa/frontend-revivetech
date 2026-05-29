@@ -19,8 +19,8 @@ export default function FinancePage() {
   }, [])
 
   function handleBack() {
-    logout()
     navigate('/', { replace: true })
+    logout()
   }
 
   function markNotifRead(id: string) {

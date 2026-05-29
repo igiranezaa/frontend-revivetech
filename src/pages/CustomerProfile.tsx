@@ -119,8 +119,8 @@ export default function CustomerProfile() {
   }
 
   function handleLogout() {
-    logout()
     navigate('/', { replace: true })
+    logout()
   }
 
   function handlePwSubmit(e: { preventDefault(): void }) {
