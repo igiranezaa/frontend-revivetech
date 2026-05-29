@@ -8,7 +8,7 @@ import './OverviewSection.css'
 
 export default function OverviewSection() {
   const total = OVERVIEW_PIE_DATA.reduce((s, d) => s + d.value, 0)
-  const currentOrders = OVERVIEW_ORDERS_TREND[OVERVIEW_ORDERS_TREND.length - 1].orders
+  const currentOrders = OVERVIEW_ORDERS_TREND.at(-1)?.orders ?? 0
 
   return (
     <div className="overview-stack">
@@ -53,7 +53,7 @@ export default function OverviewSection() {
           <h3 className="ov-chart-title">Monthly Revenue</h3>
           <RevenueBarChart data={OVERVIEW_REVENUE_TREND} />
           <p className="ov-chart-hint">
-            Current month: <strong>$124,592</strong>
+            Current month: <strong>$0</strong>
           </p>
         </div>
 

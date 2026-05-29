@@ -3,8 +3,16 @@ import type { FoMonthlyLoan } from './foHelpers'
 interface Props { data: FoMonthlyLoan[]; height?: number }
 
 export default function FoBarChart({ data, height = 130 }: Props) {
-  const max = Math.max(...data.map((d) => d.count))
   const w = 320
+  if (data.length === 0) {
+    return (
+      <svg width="100%" viewBox={`0 0 ${w} ${height + 28}`} preserveAspectRatio="xMidYMid meet">
+        <rect x="12" y="0" width={w - 24} height={height} rx="10" fill="#f8fafc" />
+        <text x={w / 2} y={height / 2} textAnchor="middle" fill="#94a3b8" fontSize="11">No data yet</text>
+      </svg>
+    )
+  }
+  const max = Math.max(...data.map((d) => d.count), 1)
   const barW = Math.floor((w - 24) / data.length) - 4
   return (
     <svg width="100%" viewBox={`0 0 ${w} ${height + 28}`} preserveAspectRatio="xMidYMid meet">

@@ -5,11 +5,19 @@ interface Props { data: FoApprovalTrend[]; height?: number }
 export default function FoLineChart({ data, height = 100 }: Props) {
   const w = 320
   const pad = 16
+  if (data.length === 0) {
+    return (
+      <svg width="100%" viewBox={`0 0 ${w} ${height + 22}`} preserveAspectRatio="xMidYMid meet">
+        <rect x={pad} y="8" width={w - pad * 2} height={height - 8} rx="10" fill="#f8fafc" />
+        <text x={w / 2} y={height / 2} textAnchor="middle" fill="#94a3b8" fontSize="11">No data yet</text>
+      </svg>
+    )
+  }
   const max = Math.max(...data.map((d) => d.rate))
   const min = Math.min(...data.map((d) => d.rate)) - 5
   const pts = data.map((d, i) => {
-    const x = pad + (i / (data.length - 1)) * (w - pad * 2)
-    const y = height - ((d.rate - min) / (max - min)) * (height - 20) - 8
+    const x = data.length === 1 ? w / 2 : pad + (i / (data.length - 1)) * (w - pad * 2)
+    const y = height - ((d.rate - min) / Math.max(max - min, 1)) * (height - 20) - 8
     return [x, y] as [number, number]
   })
   const pathD = pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x},${y}`).join(' ')

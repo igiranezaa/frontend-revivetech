@@ -15,7 +15,7 @@ export default function DonutChart({ data, size = 160, centerLabel, centerSub }:
   const total = data.reduce((s, d) => s + d.value, 0)
   const segments: { color: string; dashArray: string; dashOffset: number }[] = []
   let acc = 0
-  for (const d of data.filter((d) => d.value > 0)) {
+  for (const d of total > 0 ? data.filter((d) => d.value > 0) : []) {
     const len = (d.value / total) * circ
     segments.push({ color: d.color, dashArray: `${len} ${circ - len}`, dashOffset: circ - acc })
     acc += len

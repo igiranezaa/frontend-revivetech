@@ -11,13 +11,25 @@ export default function OrdersLineChart({ data }: OrdersLineChartProps) {
   const chartW = W - padL - padR
   const chartH = H - padT - padB
 
+  if (data.length === 0) {
+    return (
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+        <rect x={padL} y={padT} width={chartW} height={chartH} rx="10" fill="#f8fafc" />
+        <text x={W / 2} y={H / 2} textAnchor="middle" fill="#94a3b8" fontSize="12" fontFamily="system-ui, sans-serif">
+          No order data yet
+        </text>
+      </svg>
+    )
+  }
+
   const orders = data.map((d) => d.orders ?? 0)
   const max = Math.max(...orders)
   const min = Math.min(...orders) - 8
 
   const pts = data.map((d, i) => {
-    const x = padL + (i / (data.length - 1)) * chartW
-    const y = padT + chartH - (((d.orders ?? 0) - min) / (max - min)) * chartH
+    const x = data.length === 1 ? W / 2 : padL + (i / (data.length - 1)) * chartW
+    const range = Math.max(max - min, 1)
+    const y = padT + chartH - (((d.orders ?? 0) - min) / range) * chartH
     return [x, y] as [number, number]
   })
 

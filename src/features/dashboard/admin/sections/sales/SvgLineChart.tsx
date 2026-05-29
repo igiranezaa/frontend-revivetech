@@ -13,6 +13,16 @@ export default function SvgLineChart({ data, color = '#025c50', valuePrefix = '$
   const W = 500, H = 180, PL = 56, PR = 20, PT = 20, PB = 32
   const plotW = W - PL - PR
   const plotH = H - PT - PB
+
+  if (data.length === 0) {
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', overflow: 'visible' }}>
+        <rect x={PL} y={PT} width={plotW} height={plotH} rx="10" fill="#f8fafc" />
+        <text x={W / 2} y={H / 2} textAnchor="middle" fontSize="12" fill="#94a3b8">No data yet</text>
+      </svg>
+    )
+  }
+
   const vals  = data.map((d) => d.value)
   const min   = Math.min(...vals)
   const max   = Math.max(...vals)

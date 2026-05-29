@@ -10,10 +10,21 @@ export default function RevenueBarChart({ data }: RevenueBarChartProps) {
   const padL = 10, padR = 10, padT = 28, padB = 26
   const chartW = W - padL - padR
   const chartH = H - padT - padB
-  const max = Math.max(...data.map((d) => d.revenue ?? 0))
+  const max = Math.max(...data.map((d) => d.revenue ?? 0), 1)
   const step = chartW / data.length
   const barW = Math.floor(step * 0.55)
   const fmtK = (v: number) => '$' + Math.round(v / 1000) + 'K'
+
+  if (data.length === 0) {
+    return (
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+        <rect x={padL} y={padT} width={chartW} height={chartH} rx="10" fill="#f8fafc" />
+        <text x={W / 2} y={H / 2} textAnchor="middle" fill="#94a3b8" fontSize="12" fontFamily="system-ui, sans-serif">
+          No revenue data yet
+        </text>
+      </svg>
+    )
+  }
 
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">

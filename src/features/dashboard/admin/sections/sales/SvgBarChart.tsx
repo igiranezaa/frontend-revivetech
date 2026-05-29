@@ -12,6 +12,16 @@ export default function SvgBarChart({ data, color = '#1d4ed8' }: Props) {
   const W = 500, H = 160, PL = 36, PR = 16, PT = 16, PB = 28
   const plotW = W - PL - PR
   const plotH = H - PT - PB
+
+  if (data.length === 0) {
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', overflow: 'visible' }}>
+        <rect x={PL} y={PT} width={plotW} height={plotH} rx="10" fill="#f8fafc" />
+        <text x={W / 2} y={H / 2} textAnchor="middle" fontSize="12" fill="#94a3b8">No data yet</text>
+      </svg>
+    )
+  }
+
   const max   = Math.max(...data.map((d) => d.value)) || 1
   const slotW = plotW / data.length
   const barW  = slotW * 0.55
