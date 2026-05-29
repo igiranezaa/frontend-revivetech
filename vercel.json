@@ -2,7 +2,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/.*|favicon.svg|icons.svg|macbook.jpg|shopping.png|shoppingOff.png|shoppingOff$|shopping$).*)",
       "destination": "/index.html"
     }
   ]
