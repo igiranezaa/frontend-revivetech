@@ -16,48 +16,11 @@ import type { SupportTicket, TicketStatus } from '../context/SupportContext'
 import type { Listing } from '../features/marketplace/types'
 
 // ── Mock data ────────────────────────────────────────────────────────────────
-const MOCK_ORDERS = [
-  {
-    id: 'ORD-2841', device: 'iPhone 15 Pro', condition: 'Excellent' as const,
-    price: 840, date: 'May 15, 2025', status: 'Delivered',
-    img: 'https://images.unsplash.com/photo-1730036900477-09391e7a5414?q=80&w=580&auto=format&fit=crop',
-  },
-  {
-    id: 'ORD-2756', device: 'MacBook Air M2', condition: 'Good' as const,
-    price: 799, date: 'Apr 22, 2025', status: 'Shipped',
-    img: 'https://images.unsplash.com/photo-1650750018363-ff7ffe460f4b?q=80&w=709&auto=format&fit=crop',
-  },
-  {
-    id: 'ORD-2601', device: 'Samsung Galaxy S24 Ultra', condition: 'Excellent' as const,
-    price: 950, date: 'Mar 10, 2025', status: 'Processing',
-    img: 'https://images.unsplash.com/photo-1738830246146-599b67d009db?q=80&w=1032&auto=format&fit=crop',
-  },
-  {
-    id: 'ORD-2490', device: 'iPad Air 5th Gen', condition: 'Fair' as const,
-    price: 420, date: 'Feb 4, 2025', status: 'Delivered',
-    img: 'https://images.unsplash.com/photo-1703756847845-0fbe0be766ee?q=80&w=1032&auto=format&fit=crop',
-  },
-]
+const MOCK_ORDERS: any[] = []
 
-const MOCK_INSTALLMENTS = [
-  {
-    ref: 'INS-7741', device: 'MacBook Air M2', monthly: 89.90,
-    paid: 3, total: 12, nextDue: 'Jun 1, 2025', status: 'Active',
-    img: 'https://images.unsplash.com/photo-1650750018363-ff7ffe460f4b?q=80&w=709&auto=format&fit=crop',
-  },
-  {
-    ref: 'INS-6820', device: 'iPhone 15 Pro', monthly: 70.00,
-    paid: 6, total: 12, nextDue: 'Jun 1, 2025', status: 'Active',
-    img: 'https://images.unsplash.com/photo-1730036900477-09391e7a5414?q=80&w=580&auto=format&fit=crop',
-  },
-]
+const MOCK_INSTALLMENTS: any[] = []
 
-const MOCK_ACTIVITY = [
-  { id: 1, icon: ShoppingBag, text: 'Order ORD-2841 delivered', time: '2 days ago', color: 'text-emerald-600' },
-  { id: 2, icon: CreditCard, text: 'Installment payment — INS-7741', time: '5 days ago', color: 'text-blue-600' },
-  { id: 3, icon: Heart, text: 'Saved Google Pixel 8 Pro', time: '1 week ago', color: 'text-rose-500' },
-  { id: 4, icon: Package, text: 'Order ORD-2756 shipped', time: '1 week ago', color: 'text-amber-600' },
-]
+const MOCK_ACTIVITY: any[] = []
 
 const CONDITION_STYLES = {
   Excellent: 'bg-emerald-100 text-emerald-700',
@@ -157,7 +120,7 @@ export default function CustomerProfile() {
 
   function handleLogout() {
     logout()
-    navigate('/login', { replace: true })
+    navigate('/', { replace: true })
   }
 
   function handlePwSubmit(e: { preventDefault(): void }) {
@@ -505,7 +468,7 @@ export default function CustomerProfile() {
                               <span className='text-xs font-mono text-gray-400'>{o.id}</span>
                               <span className='text-gray-300'>·</span>
                               <span className='text-xs text-gray-400'>{o.date}</span>
-                              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${CONDITION_STYLES[o.condition]}`}>
+                              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${CONDITION_STYLES[o.condition as keyof typeof CONDITION_STYLES] ?? 'bg-gray-100 text-gray-500'}`}>
                                 {o.condition}
                               </span>
                             </div>

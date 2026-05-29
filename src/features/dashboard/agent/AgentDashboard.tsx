@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext'
 import { useSupport, type SupportTicket, type TicketStatus, type TicketPriority } from '../../../context/SupportContext'
+import { getNotifications, markNotificationRead } from '../../../lib/api'
+import type { DashboardNotification } from '../shared/types/dashboard.types'
 import './AgentDashboard.css'
 
 // ── Icons ───────────────────────────────────────────────────────────────────
@@ -49,14 +51,6 @@ const PRIORITY_CONFIG: Record<TicketPriority, { label: string; color: string }> 
   high:   { label: 'High',   color: '#d97706' },
   urgent: { label: 'Urgent', color: '#dc2626' },
 }
-
-// ── Notification seed ────────────────────────────────────────────────────────
-const AGENT_NOTIFS = [
-  { id: 'N1', type: 'info',  title: 'New ticket assigned',    desc: 'TKT-1001 from Alex Kamana',          time: '2 min ago',   read: false },
-  { id: 'N2', type: 'warn',  title: 'High priority ticket',   desc: 'TKT-1002 requires urgent attention', time: '15 min ago',  read: false },
-  { id: 'N3', type: 'info',  title: 'Ticket resolved',        desc: 'TKT-1003 marked as resolved',        time: '1 hour ago',  read: true  },
-  { id: 'N4', type: 'error', title: 'SLA breach approaching', desc: 'TKT-1002 response SLA in 30 min',    time: '20 min ago',  read: false },
-]
 
 // ── Sub-components ──────────────────────────────────────────────────────────
 
@@ -526,7 +520,7 @@ function AgentHeader({
 }: {
   darkMode: boolean
   onToggleDark: () => void
-  notifications: { id: string; type: string; title: string; desc: string; time: string; read: boolean }[]
+  notifications: DashboardNotification[]
   onMarkRead: (id: string) => void
   title: string
   subtitle: string
@@ -640,7 +634,7 @@ function AgentHeader({
               <button
                 type="button"
                 className="agent-user-menu-item agent-user-menu-item--logout"
-                onClick={() => { logout(); navigate('/login', { replace: true }) }}
+                onClick={() => { logout(); navigate('/', { replace: true }) }}
               >
                 <Icon d={ICONS.logout} size={14} />
                 Log out
@@ -687,7 +681,7 @@ export default function AgentDashboard() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab]         = useState<AgentTab>('overview')
   const [darkMode, setDarkMode]           = useState(false)
-  const [notifications, setNotifications] = useState(AGENT_NOTIFS)
+  const [notifications, setNotifications] = useState<DashboardNotification[]>([])
   const [chatTicket, setChatTicket]       = useState<SupportTicket | null>(null)
 
   const { tickets } = useSupport()
@@ -697,8 +691,15 @@ export default function AgentDashboard() {
     return () => document.documentElement.setAttribute('data-theme', 'light')
   }, [darkMode])
 
+  useEffect(() => {
+    getNotifications()
+      .then(setNotifications)
+      .catch(() => setNotifications([]))
+  }, [])
+
   function markNotifRead(id: string) {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+    markNotificationRead(id).catch(() => undefined)
   }
 
   function handleOpenChat(ticket: SupportTicket) {

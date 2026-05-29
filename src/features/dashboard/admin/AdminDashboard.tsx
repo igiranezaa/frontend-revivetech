@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ADMIN_PROFILE, NAV_ITEMS, NOTIFICATIONS_SEED, SECTION_COPY } from '../../../data/mockData'
+import { ADMIN_PROFILE, NAV_ITEMS, SECTION_COPY } from '../../../data/mockData'
 import type { DashboardNotification } from '../shared/types/dashboard.types'
+import { getNotifications, markNotificationRead } from '../../../lib/api'
 import DashboardActions from '../../../components/DashboardActions'
 import OverviewSection from './sections/overview/OverviewSection'
 import UsersSection from './sections/users/UsersSection'
@@ -21,11 +22,17 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
   const [viewMode, setViewMode] = useState<ViewMode>('admin')
   const [darkMode, setDarkMode] = useState(false)
-  const [notifications, setNotifications] = useState<DashboardNotification[]>(NOTIFICATIONS_SEED)
+  const [notifications, setNotifications] = useState<DashboardNotification[]>([])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light')
   }, [darkMode])
+
+  useEffect(() => {
+    getNotifications()
+      .then(setNotifications)
+      .catch(() => setNotifications([]))
+  }, [])
 
   function toggleDark() {
     setDarkMode((v) => !v)
@@ -35,6 +42,7 @@ export default function AdminDashboard() {
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     )
+    markNotificationRead(id).catch(() => undefined)
   }
 
   if (viewMode === 'technician') {

@@ -78,7 +78,7 @@ export default function Navbar() {
     setShowUserMenu(false);
     setIsMenuOpen(false);
     logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   }
 
   useEffect(() => {

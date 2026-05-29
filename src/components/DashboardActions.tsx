@@ -153,7 +153,7 @@ export default function DashboardActions({
   function handleLogout() {
     setShowUserMenu(false)
     logout()
-    navigate('/login', { replace: true })
+    navigate('/', { replace: true })
   }
 
   function handleProfile() {

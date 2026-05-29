@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { DashboardNotification, User } from '../features/dashboard/shared/types/dashboard.types';
 import type { Listing } from '../features/marketplace/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5001';
@@ -121,6 +122,96 @@ export async function getMarketplaceListings(params?: {
 export async function getMarketplaceListing(id: string) {
   const { data } = await api.get<{ listing: ApiMarketplaceListing }>(`/api/marketplace/${id}`);
   return mapListing(data.listing);
+}
+
+interface ApiNotification {
+  id: string;
+  type: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
+function formatRelativeTime(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  if (seconds < 60) return 'Just now';
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? '' : 's'} ago`;
+
+  return date.toLocaleDateString();
+}
+
+function notificationType(type: string): DashboardNotification['type'] {
+  const normalized = type.toLowerCase();
+  if (normalized.includes('error') || normalized.includes('fail')) return 'error';
+  if (normalized.includes('warn') || normalized.includes('alert')) return 'warn';
+  return 'info';
+}
+
+function mapNotification(notification: ApiNotification): DashboardNotification {
+  return {
+    id: notification.id,
+    type: notificationType(notification.type),
+    title: notification.type
+      .toLowerCase()
+      .split(/[_\s-]+/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ') || 'Notification',
+    desc: notification.message,
+    time: formatRelativeTime(notification.createdAt),
+    read: notification.read,
+  };
+}
+
+export async function getNotifications() {
+  const { data } = await api.get<{ notifications: ApiNotification[] }>('/api/notifications');
+  return data.notifications.map(mapNotification);
+}
+
+export async function markNotificationRead(id: string) {
+  await api.patch(`/api/notifications/${id}/read`);
+}
+
+function roleLabel(role: ApiRole) {
+  const labels: Record<ApiRole, string> = {
+    CUSTOMER: 'Customer',
+    ADMIN: 'Admin',
+    TECHNICIAN: 'Technician',
+    FINANCE_OFFICER: 'Finance Officer',
+    SUPPORT_AGENT: 'Support Agent',
+  };
+  return labels[role];
+}
+
+interface ApiAdminUser extends ApiUser {
+  isVerified?: boolean;
+  createdAt?: string;
+}
+
+export async function getAdminUsers(): Promise<User[]> {
+  const { data } = await api.get<{ users: ApiAdminUser[] }>('/api/users/admin/users');
+  return data.users.map((user) => ({
+    id: user.id,
+    name: `${user.firstName} ${user.lastName}`.trim(),
+    email: user.email,
+    phone: user.phone ?? '',
+    role: roleLabel(user.role),
+    status: user.isVerified === false ? 'Deactivated' : 'Active',
+    lastActive: 'From database',
+    lastActiveDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '',
+    joinDate: user.createdAt ?? '',
+  }));
 }
 
 export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong. Please try again.') {

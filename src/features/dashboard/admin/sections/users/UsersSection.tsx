@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
-import { USERS_SEED } from '../../../../../data/mockData'
+import { useEffect, useMemo, useState } from 'react'
 import type { User } from '../../../shared/types/dashboard.types'
+import { getAdminUsers } from '../../../../../lib/api'
 import Pagination from '../../../shared/components/Pagination'
 import UserViewModal from './UserViewModal'
 import UserEditModal from './UserEditModal'
@@ -16,12 +16,18 @@ export default function UsersSection() {
   const [roleFilter, setRoleFilter]     = useState('All')
   const [statusFilter, setStatusFilter] = useState('All')
   const [page, setPage]                 = useState(1)
-  const [users, setUsers]               = useState<User[]>(USERS_SEED)
+  const [users, setUsers]               = useState<User[]>([])
   const [viewUser, setViewUser]         = useState<User | null>(null)
   const [editUser, setEditUser]         = useState<User | null>(null)
 
   const handleSave = (updated: User) =>
     setUsers((prev) => prev.map((u) => u.id === updated.id ? updated : u))
+
+  useEffect(() => {
+    getAdminUsers()
+      .then(setUsers)
+      .catch(() => setUsers([]))
+  }, [])
 
   const counts = useMemo(() => {
     const sevenDaysAgo = new Date(TODAY)
@@ -30,7 +36,7 @@ export default function UsersSection() {
       total:       users.length,
       active:      users.filter((u) => u.status === 'Active').length,
       deactivated: users.filter((u) => u.status === 'Deactivated').length,
-      newUsers:    users.filter((u) => new Date(u.joinDate) >= sevenDaysAgo).length,
+      newUsers:    users.filter((u) => u.joinDate && new Date(u.joinDate) >= sevenDaysAgo).length,
     }
   }, [users])
 
@@ -60,7 +66,7 @@ export default function UsersSection() {
       bg: 'rgba(2,92,80,0.09)', fg: '#025c50',
     },
     {
-      label: 'Active Users', value: counts.active, change: `${((counts.active / counts.total) * 100).toFixed(0)}% rate`,
+      label: 'Active Users', value: counts.active, change: `${counts.total ? ((counts.active / counts.total) * 100).toFixed(0) : 0}% rate`,
       icon: <><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>,
       bg: 'rgba(34,197,94,0.1)', fg: '#15803d',
     },
