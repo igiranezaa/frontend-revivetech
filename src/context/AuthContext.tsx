@@ -63,6 +63,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data } = await api.post<{ token: string; user: ApiUser }>('/api/auth/login', {
         email,
         password,
+      }, {
+        timeout: 15_000,
       });
       const authUser = mapUser(data.user);
       sessionStorage.setItem('auth_user', JSON.stringify(authUser));
@@ -71,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(data.token);
       return authUser;
     } catch (error) {
-      throw new Error(getApiErrorMessage(error, 'Invalid email or password.'));
+      throw new Error(getApiErrorMessage(error, 'Invalid email or password.'), { cause: error });
     }
   }
 
@@ -89,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider');

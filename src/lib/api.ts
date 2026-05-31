@@ -279,6 +279,9 @@ export async function deleteAdminUser(id: string) {
 
 export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong. Please try again.') {
   if (axios.isAxiosError(error)) {
+    if (error.code === 'ECONNABORTED') {
+      return 'Login is taking too long. The server may be waking up. Please try again in a moment.';
+    }
     const message = error.response?.data?.message ?? error.response?.data?.error;
     if (typeof message === 'string') return message;
   }
