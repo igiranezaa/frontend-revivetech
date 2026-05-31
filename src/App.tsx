@@ -3,6 +3,7 @@ import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { SupportProvider } from './context/SupportContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import RequireAuth from './components/RequireAuth';
 
 import HeroSection from './features/marketplace/HeroSection';
 import LoginForm from './features/auth/components/login-form';
@@ -38,7 +39,14 @@ function App() {
           <Route path='/ResetPassword'   element={<ResetPasswordForm />} />
           <Route path='/marketplace'     element={<Marketplace />} />
           <Route path='/marketplace/:id' element={<DeviceDetailsPage />} />
-          <Route path='/Sell-Your-Device' element={<SellDevice />} />
+          <Route
+            path='/Sell-Your-Device'
+            element={
+              <RequireAuth>
+                <SellDevice />
+              </RequireAuth>
+            }
+          />
           <Route path='/checkout'        element={<CheckoutPage />} />
           <Route path='/about'           element={<AboutPage />} />
 

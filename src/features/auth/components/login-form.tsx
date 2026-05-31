@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { useAuth } from '../../../context/AuthContext'
 
 export default function LoginForm() {
   const { login } = useAuth()
   const navigate  = useNavigate()
+  const location  = useLocation()
 
   const [email, setEmail]               = useState('')
   const [password, setPassword]         = useState('')
@@ -20,7 +21,8 @@ export default function LoginForm() {
 
     try {
       const user = await login(email.trim(), password)
-      navigate(user.redirectTo, { replace: true })
+      const from = (location.state as { from?: string } | null)?.from
+      navigate(from ?? user.redirectTo, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     } finally {
