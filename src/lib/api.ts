@@ -140,10 +140,15 @@ function inventoryCategory(device: ApiDevice) {
   return categoryFromDevice(device).replace('Smartwatch', 'Wearable');
 }
 
+function inventorySku(device: ApiDevice) {
+  const serialNumber = device.originalSerialNumber?.trim();
+  return serialNumber && serialNumber !== 'undefined' && serialNumber !== 'null' ? serialNumber : device.id;
+}
+
 function mapInventoryDevice(device: ApiDevice): Device {
   return {
     id: device.id,
-    sku: device.originalSerialNumber || device.id,
+    sku: inventorySku(device),
     brand: device.brand,
     model: `${device.brand} ${device.model}`.trim(),
     category: inventoryCategory(device),
@@ -174,9 +179,12 @@ export async function createAdminDevice(input: {
   warehouse: string;
   stock: number;
   image: File;
+  publishToMarketplace: boolean;
 }) {
   const formData = new FormData();
-  Object.entries(input).forEach(([key, value]) => formData.append(key, value instanceof File ? value : String(value)));
+  Object.entries(input).forEach(([key, value]) => {
+    if (value !== undefined) formData.append(key, value instanceof File ? value : String(value));
+  });
   const { data } = await api.post<{ device: ApiDevice }>('/api/devices/intake', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });

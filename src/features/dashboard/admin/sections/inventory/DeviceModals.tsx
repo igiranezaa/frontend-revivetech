@@ -20,6 +20,7 @@ interface AddProps {
     warehouse: string
     stock: number
     image: File
+    publishToMarketplace: boolean
   }) => Promise<void>
 }
 
@@ -34,6 +35,7 @@ export function AddDeviceModal({ onClose, onSave }: AddProps) {
     price: '',
     warehouse: INV_WAREHOUSES[0],
     stock: '1',
+    publishToMarketplace: true,
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -41,6 +43,8 @@ export function AddDeviceModal({ onClose, onSave }: AddProps) {
   const [previewUrl, setPreviewUrl] = useState('')
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((current) => ({ ...current, [key]: e.target.value }))
+  const setChecked = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((current) => ({ ...current, [key]: e.target.checked }))
 
   useEffect(() => {
     return () => {
@@ -85,6 +89,7 @@ export function AddDeviceModal({ onClose, onSave }: AddProps) {
         warehouse: form.warehouse,
         stock: Number(form.stock),
         image,
+        publishToMarketplace: form.publishToMarketplace,
       })
       onClose()
     } catch (err) {
@@ -103,7 +108,7 @@ export function AddDeviceModal({ onClose, onSave }: AddProps) {
         </button>
       </>
     }>
-      <p className="um-form-note">Register a device intake record. It will be saved to the database immediately.</p>
+      <p className="um-form-note">Register a device intake record and choose whether it should appear on the marketplace immediately.</p>
       {error && <div className="inv-form-error" role="alert">{error}</div>}
       <div className="um-form-grid">
         <label className="inv-upload-field">
@@ -160,6 +165,13 @@ export function AddDeviceModal({ onClose, onSave }: AddProps) {
         <label className="um-form-field">
           <span className="um-form-label">Selling Price ($)</span>
           <input className="um-form-input" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} placeholder="0.00" />
+        </label>
+        <label className="inv-publish-field">
+          <input type="checkbox" checked={form.publishToMarketplace} onChange={setChecked('publishToMarketplace')} />
+          <span>
+            <strong>Publish on marketplace</strong>
+            <small>Show this device on the homepage and marketplace immediately.</small>
+          </span>
         </label>
       </div>
     </ModalBase>
