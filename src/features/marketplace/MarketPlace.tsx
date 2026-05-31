@@ -64,6 +64,7 @@ interface SidebarProps {
   selectedCondition: string;
   onConditionChange: (condition: string) => void;
   onReset: () => void;
+  onApply: () => void;
   activeFilterCount: number;
   isOpen: boolean;
   onClose: () => void;
@@ -73,7 +74,7 @@ function Sidebar({
   categories, selectedCategory, onCategoryChange,
   pricePresetIndex, onPricePresetChange,
   conditions, selectedCondition, onConditionChange,
-  onReset, activeFilterCount, isOpen, onClose,
+  onReset, onApply, activeFilterCount, isOpen, onClose,
 }: SidebarProps) {
   return (
     <>
@@ -88,7 +89,8 @@ function Sidebar({
       {/* Panel — slides in from left on ALL screen sizes */}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-72 bg-white z-40 shadow-2xl overflow-y-auto
+          fixed top-0 left-0 h-full w-80 max-w-[88vw] bg-white z-40 shadow-2xl
+          flex flex-col
           transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
@@ -112,14 +114,14 @@ function Sidebar({
           </button>
         </div>
 
-        <div className='p-5 space-y-7'>
+        <div className='flex-1 overflow-y-auto p-5 space-y-7'>
           {/* Clear filters */}
           {activeFilterCount > 0 && (
             <button
               onClick={onReset}
-              className='w-full text-sm font-semibold text-red-500 hover:text-red-600 hover:bg-red-50 py-2 rounded-xl transition-colors'
+              className='w-full text-left text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-xl transition-colors'
             >
-              Clear all filters
+              Reset selections
             </button>
           )}
 
@@ -201,6 +203,23 @@ function Sidebar({
               Every device can be paid over 12 months. No upfront payment needed.
             </p>
           </div>
+        </div>
+
+        <div className='border-t border-gray-100 bg-white p-4 shadow-[0_-8px_24px_rgba(15,23,42,0.06)]'>
+          <button
+            type='button'
+            onClick={onApply}
+            className='w-full flex items-center justify-center gap-2 bg-[#127058] hover:bg-[#0e5845] text-white text-sm font-black px-4 py-3 rounded-xl transition-colors shadow-sm'
+          >
+            <SlidersHorizontal className='w-4 h-4' />
+            Apply filters
+            {activeFilterCount > 0 && (
+              <span className='bg-white/20 text-white text-[10px] min-w-5 h-5 px-1 rounded-full flex items-center justify-center'>
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+          <p className='text-[11px] text-gray-400 text-center mt-2'>Results update after you apply your selections.</p>
         </div>
       </aside>
     </>
@@ -416,6 +435,9 @@ export default function Marketplace() {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') ?? 'All');
   const [selectedCondition, setSelectedCondition] = useState('All');
   const [pricePresetIndex, setPricePresetIndex] = useState(0);
+  const [draftCategory, setDraftCategory]       = useState(selectedCategory);
+  const [draftCondition, setDraftCondition]     = useState(selectedCondition);
+  const [draftPricePresetIndex, setDraftPricePresetIndex] = useState(pricePresetIndex);
   const [sortBy, setSortBy]                 = useState<SortOption>('default');
   const [viewMode, setViewMode]             = useState<ViewMode>('grid');
   const [sidebarOpen, setSidebarOpen]       = useState(false);
@@ -475,6 +497,13 @@ export default function Marketplace() {
     if (selectedCondition !== 'All') n++;
     return n;
   }, [selectedCategory, pricePresetIndex, selectedCondition]);
+  const draftFilterCount = useMemo(() => {
+    let n = 0;
+    if (draftCategory !== 'All') n++;
+    if (draftPricePresetIndex !== 0) n++;
+    if (draftCondition !== 'All') n++;
+    return n;
+  }, [draftCategory, draftPricePresetIndex, draftCondition]);
 
   const filteredListings = useMemo(() => {
     const { min, max } = PRICE_PRESETS[pricePresetIndex];
@@ -499,6 +528,26 @@ export default function Marketplace() {
     setSortBy('default');
   }
 
+  function openFilters() {
+    setDraftCategory(selectedCategory);
+    setDraftPricePresetIndex(pricePresetIndex);
+    setDraftCondition(selectedCondition);
+    setSidebarOpen(true);
+  }
+
+  function resetDraftFilters() {
+    setDraftCategory('All');
+    setDraftPricePresetIndex(0);
+    setDraftCondition('All');
+  }
+
+  function applyFilters() {
+    setSelectedCategory(draftCategory);
+    setPricePresetIndex(draftPricePresetIndex);
+    setSelectedCondition(draftCondition);
+    setSidebarOpen(false);
+  }
+
   function toggleSaved(id: string) {
     setSavedIds((current) => current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]);
   }
@@ -518,22 +567,23 @@ export default function Marketplace() {
 
       {/* ── Filter Toggle Button — always visible on left edge ────────────── */}
       <FilterToggleButton
-        onClick={() => setSidebarOpen(true)}
+        onClick={openFilters}
         activeFilterCount={activeFilterCount}
       />
 
       {/* ── Sidebar ──────────────────────────────────────────────────────────  */}
       <Sidebar
         categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={(c) => { setSelectedCategory(c); setSidebarOpen(false); }}
-        pricePresetIndex={pricePresetIndex}
-        onPricePresetChange={(i) => { setPricePresetIndex(i); }}
+        selectedCategory={draftCategory}
+        onCategoryChange={setDraftCategory}
+        pricePresetIndex={draftPricePresetIndex}
+        onPricePresetChange={setDraftPricePresetIndex}
         conditions={conditions}
-        selectedCondition={selectedCondition}
-        onConditionChange={(condition) => setSelectedCondition(condition)}
-        onReset={handleReset}
-        activeFilterCount={activeFilterCount}
+        selectedCondition={draftCondition}
+        onConditionChange={setDraftCondition}
+        onReset={resetDraftFilters}
+        onApply={applyFilters}
+        activeFilterCount={draftFilterCount}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />

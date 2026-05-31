@@ -297,15 +297,6 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              {user && DASHBOARD_ROLES.has(user.role) && (
-                <Link
-                  to={user.redirectTo}
-                  className='inline-flex items-center gap-1.5 text-sm font-semibold text-[#127058] bg-[#127058]/8 hover:bg-[#127058]/15 px-3 py-2 rounded-xl transition-all'
-                >
-                  <LayoutDashboard size={15} />
-                  Dashboard
-                </Link>
-              )}
             </div>
 
             {/* ── Right Actions ───────────────────────────────────────────── */}
@@ -378,6 +369,17 @@ export default function Navbar() {
                           <p className='text-sm font-semibold text-gray-900'>{user.name}</p>
                           <p className='text-xs text-gray-500 mt-0.5'>{displayRole}</p>
                         </div>
+                        {/* Role dashboard */}
+                        {DASHBOARD_ROLES.has(user.role) && (
+                          <button
+                            type='button'
+                            onClick={() => { setShowUserMenu(false); navigate(user.redirectTo); }}
+                            className='w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#127058] hover:bg-[#127058]/8 transition-colors'
+                          >
+                            <LayoutDashboard size={14} />
+                            Dashboard
+                          </button>
+                        )}
                         {/* Profile */}
                         <button
                           type='button'
@@ -440,17 +442,6 @@ export default function Navbar() {
                   <ArrowRight className='w-4 h-4 text-gray-400' />
                 </Link>
               ))}
-              {user && DASHBOARD_ROLES.has(user.role) && (
-                <Link
-                  to={user.redirectTo}
-                  onClick={() => setIsMenuOpen(false)}
-                  className='flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-[#127058] bg-[#127058]/8 hover:bg-[#127058]/15 transition-colors'
-                >
-                  <span className='flex items-center gap-2'><LayoutDashboard size={16} />Dashboard</span>
-                  <ArrowRight className='w-4 h-4 text-[#127058]/60' />
-                </Link>
-              )}
-
               <div className='border-t border-gray-100 my-2 pt-2 space-y-2'>
                 <p className='text-[10px] font-black text-gray-400 uppercase tracking-wider px-4'>
                   Account
@@ -469,6 +460,16 @@ export default function Navbar() {
                       </div>
                       <span className='w-2 h-2 rounded-full bg-green-500 flex-shrink-0' aria-hidden />
                     </div>
+                    {DASHBOARD_ROLES.has(user.role) && (
+                      <Link
+                        to={user.redirectTo}
+                        onClick={() => setIsMenuOpen(false)}
+                        className='flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-[#127058] bg-[#127058]/8 hover:bg-[#127058]/15 transition-colors'
+                      >
+                        <span className='flex items-center gap-2'><LayoutDashboard size={16} />Dashboard</span>
+                        <ArrowRight className='w-4 h-4 text-[#127058]/60' />
+                      </Link>
+                    )}
                     <button
                       type='button'
                       onClick={handleLogout}
