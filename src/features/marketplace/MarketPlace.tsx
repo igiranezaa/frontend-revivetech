@@ -10,6 +10,10 @@ import {
   List,
   Filter,
   ChevronRight,
+  Heart,
+  Scale,
+  ShieldCheck,
+  Leaf,
 } from 'lucide-react';
 import LoadingSpinner from '../../shared/components/loading-spinner';
 import { Link } from 'react-router-dom';
@@ -56,6 +60,9 @@ interface SidebarProps {
   onCategoryChange: (c: string) => void;
   pricePresetIndex: number;
   onPricePresetChange: (i: number) => void;
+  conditions: string[];
+  selectedCondition: string;
+  onConditionChange: (condition: string) => void;
   onReset: () => void;
   activeFilterCount: number;
   isOpen: boolean;
@@ -65,6 +72,7 @@ interface SidebarProps {
 function Sidebar({
   categories, selectedCategory, onCategoryChange,
   pricePresetIndex, onPricePresetChange,
+  conditions, selectedCondition, onConditionChange,
   onReset, activeFilterCount, isOpen, onClose,
 }: SidebarProps) {
   return (
@@ -161,6 +169,29 @@ function Sidebar({
             </ul>
           </div>
 
+          {/* Condition */}
+          <div>
+            <p className='text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3'>
+              Condition
+            </p>
+            <ul className='space-y-1'>
+              {conditions.map((condition) => (
+                <li key={condition}>
+                  <button
+                    onClick={() => onConditionChange(condition)}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                      selectedCondition === condition
+                        ? 'bg-[#127058] text-white shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                  >
+                    {condition === 'All' ? 'All Conditions' : condition}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Financing tip */}
           <div className='bg-gradient-to-br from-[#6E9F94]/10 to-[#127058]/10 border border-[#127058]/20 rounded-2xl p-4'>
             <p className='text-[10px] font-black uppercase tracking-wider text-[#127058] mb-1.5'>
@@ -177,7 +208,19 @@ function Sidebar({
 }
 
 // ─── Device Card (Grid) ───────────────────────────────────────────────────────
-function DeviceCard({ device }: { device: Listing }) {
+function DeviceCard({
+  device,
+  isSaved,
+  isCompared,
+  onToggleSaved,
+  onToggleCompare,
+}: {
+  device: Listing;
+  isSaved: boolean;
+  isCompared: boolean;
+  onToggleSaved: () => void;
+  onToggleCompare: () => void;
+}) {
   const monthlyPrice = Math.ceil(device.current_price / 12);
   const discountPct  = Math.round(
     ((device.original_price - device.current_price) / device.original_price) * 100,
@@ -203,6 +246,16 @@ function DeviceCard({ device }: { device: Listing }) {
             {device.condition}
           </span>
         )}
+        <button
+          type='button'
+          onClick={onToggleSaved}
+          aria-label={isSaved ? `Remove ${device.title} from wishlist` : `Save ${device.title} to wishlist`}
+          className={`absolute bottom-3 right-3 w-9 h-9 rounded-full flex items-center justify-center shadow-sm transition-all ${
+            isSaved ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-500 hover:text-red-500'
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+        </button>
       </div>
 
       <div className='p-4 flex flex-col flex-grow'>
@@ -213,6 +266,10 @@ function DeviceCard({ device }: { device: Listing }) {
             <Star key={s} className={`w-3.5 h-3.5 ${s <= (device.rating ?? 4) ? 'text-[#EF9F27] fill-[#EF9F27]' : 'text-gray-200 fill-gray-200'}`} />
           ))}
           <span className='text-xs text-gray-400 ml-1'>({device.reviewCount ?? 24})</span>
+        </div>
+        <div className='flex items-center gap-3 mb-3 text-[11px] font-bold text-gray-500'>
+          <span className='inline-flex items-center gap-1'><ShieldCheck className='w-3.5 h-3.5 text-[#127058]' />{device.trustScore ?? 100} trust</span>
+          <span className='inline-flex items-center gap-1'><Leaf className='w-3.5 h-3.5 text-emerald-600' />{device.eWasteSavedKg ?? 0}kg saved</span>
         </div>
 
         <div className='mt-auto'>
@@ -225,12 +282,24 @@ function DeviceCard({ device }: { device: Listing }) {
           </p>
         </div>
 
-        <Link
-          to={`/marketplace/${device.id}`}
-          className='w-full bg-[#127058] hover:bg-[#0e5845] active:scale-[0.98] text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm text-center block'
-        >
-          View Details
-        </Link>
+        <div className='grid grid-cols-[1fr_auto] gap-2'>
+          <Link
+            to={`/marketplace/${device.id}`}
+            className='bg-[#127058] hover:bg-[#0e5845] active:scale-[0.98] text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-sm text-center block'
+          >
+            View Details
+          </Link>
+          <button
+            type='button'
+            onClick={onToggleCompare}
+            aria-label={isCompared ? `Remove ${device.title} from comparison` : `Compare ${device.title}`}
+            className={`w-10 rounded-xl border flex items-center justify-center transition-colors ${
+              isCompared ? 'bg-[#EF9F27] border-[#EF9F27] text-gray-900' : 'border-gray-200 text-gray-500 hover:border-[#127058] hover:text-[#127058]'
+            }`}
+          >
+            <Scale className='w-4 h-4' />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -345,17 +414,19 @@ export default function Marketplace() {
   const [listings, setListings]             = useState<Listing[]>([]);
   const [searchQuery, setSearchQuery]       = useState(searchParams.get('search') ?? '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') ?? 'All');
+  const [selectedCondition, setSelectedCondition] = useState('All');
   const [pricePresetIndex, setPricePresetIndex] = useState(0);
   const [sortBy, setSortBy]                 = useState<SortOption>('default');
   const [viewMode, setViewMode]             = useState<ViewMode>('grid');
   const [sidebarOpen, setSidebarOpen]       = useState(false);
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const [savedIds, setSavedIds]                 = useState<string[]>([]);
+  const [compareIds, setCompareIds]             = useState<string[]>([]);
+  const [comparisonOpen, setComparisonOpen]     = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let alive = true;
-    setIsLoading(true);
-    setError('');
 
     getMarketplaceListings()
       .then((items) => {
@@ -388,13 +459,22 @@ export default function Marketplace() {
     () => ['All', ...new Set(listings.map((d) => d.category))],
     [listings],
   );
+  const conditions = useMemo(
+    () => ['All', ...new Set(listings.map((d) => d.condition).filter(Boolean))],
+    [listings],
+  );
+  const comparedDevices = useMemo(
+    () => compareIds.map((id) => listings.find((device) => device.id === id)).filter((device): device is Listing => Boolean(device)),
+    [compareIds, listings],
+  );
 
   const activeFilterCount = useMemo(() => {
     let n = 0;
     if (selectedCategory !== 'All') n++;
     if (pricePresetIndex !== 0) n++;
+    if (selectedCondition !== 'All') n++;
     return n;
-  }, [selectedCategory, pricePresetIndex]);
+  }, [selectedCategory, pricePresetIndex, selectedCondition]);
 
   const filteredListings = useMemo(() => {
     const { min, max } = PRICE_PRESETS[pricePresetIndex];
@@ -402,19 +482,32 @@ export default function Marketplace() {
       const matchSearch   = d.title.toLowerCase().includes(searchQuery.toLowerCase()) || d.category.toLowerCase().includes(searchQuery.toLowerCase());
       const matchCategory = selectedCategory === 'All' || d.category === selectedCategory;
       const matchPrice    = d.current_price >= min && d.current_price <= max;
-      return matchSearch && matchCategory && matchPrice;
+      const matchCondition = selectedCondition === 'All' || d.condition === selectedCondition;
+      return matchSearch && matchCategory && matchPrice && matchCondition;
     });
     if (sortBy === 'price-asc')  results = [...results].sort((a, b) => a.current_price - b.current_price);
     if (sortBy === 'price-desc') results = [...results].sort((a, b) => b.current_price - a.current_price);
     if (sortBy === 'name-asc')   results = [...results].sort((a, b) => a.title.localeCompare(b.title));
     return results;
-  }, [searchQuery, selectedCategory, pricePresetIndex, sortBy, listings]);
+  }, [searchQuery, selectedCategory, selectedCondition, pricePresetIndex, sortBy, listings]);
 
   function handleReset() {
     setSearchQuery('');
     setSelectedCategory('All');
     setPricePresetIndex(0);
+    setSelectedCondition('All');
     setSortBy('default');
+  }
+
+  function toggleSaved(id: string) {
+    setSavedIds((current) => current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]);
+  }
+
+  function toggleCompare(id: string) {
+    setCompareIds((current) => {
+      if (current.includes(id)) return current.filter((compareId) => compareId !== id);
+      return current.length === 3 ? current : [...current, id];
+    });
   }
 
   if (isLoading) return <LoadingSpinner message='Fetching devices from the database...' />;
@@ -436,6 +529,9 @@ export default function Marketplace() {
         onCategoryChange={(c) => { setSelectedCategory(c); setSidebarOpen(false); }}
         pricePresetIndex={pricePresetIndex}
         onPricePresetChange={(i) => { setPricePresetIndex(i); }}
+        conditions={conditions}
+        selectedCondition={selectedCondition}
+        onConditionChange={(condition) => setSelectedCondition(condition)}
         onReset={handleReset}
         activeFilterCount={activeFilterCount}
         isOpen={sidebarOpen}
@@ -492,6 +588,14 @@ export default function Marketplace() {
                   <span className='flex items-center gap-1 bg-[#127058]/10 text-[#127058] text-xs font-bold px-2.5 py-1.5 rounded-full'>
                     {PRICE_PRESETS[pricePresetIndex].label}
                     <button onClick={() => setPricePresetIndex(0)} className='ml-0.5 hover:text-[#0e5845]'>
+                      <X className='w-3 h-3' />
+                    </button>
+                  </span>
+                )}
+                {selectedCondition !== 'All' && (
+                  <span className='flex items-center gap-1 bg-[#127058]/10 text-[#127058] text-xs font-bold px-2.5 py-1.5 rounded-full'>
+                    {selectedCondition}
+                    <button onClick={() => setSelectedCondition('All')} className='ml-0.5 hover:text-[#0e5845]'>
                       <X className='w-3 h-3' />
                     </button>
                   </span>
@@ -579,7 +683,14 @@ export default function Marketplace() {
         {viewMode === 'grid' && filteredListings.length > 0 && (
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5'>
             {filteredListings.map((device) => (
-              <DeviceCard key={device.id} device={device} />
+              <DeviceCard
+                key={device.id}
+                device={device}
+                isSaved={savedIds.includes(device.id)}
+                isCompared={compareIds.includes(device.id)}
+                onToggleSaved={() => toggleSaved(device.id)}
+                onToggleCompare={() => toggleCompare(device.id)}
+              />
             ))}
           </div>
         )}
@@ -593,6 +704,50 @@ export default function Marketplace() {
           </div>
         )}
       </div>
+
+      {comparedDevices.length > 0 && (
+        <div className='fixed bottom-4 left-1/2 -translate-x-1/2 z-30 w-[calc(100%-2rem)] max-w-4xl rounded-2xl bg-gray-950 text-white shadow-2xl border border-white/10 overflow-hidden'>
+          <div className='flex flex-wrap items-center justify-between gap-3 px-4 py-3'>
+            <div className='flex items-center gap-3'>
+              <div className='w-9 h-9 rounded-xl bg-[#EF9F27] text-gray-950 flex items-center justify-center'>
+                <Scale className='w-4 h-4' />
+              </div>
+              <div>
+                <p className='text-sm font-bold'>Compare devices</p>
+                <p className='text-xs text-white/55'>{comparedDevices.length}/3 selected</p>
+              </div>
+            </div>
+            <div className='flex items-center gap-2'>
+              <button type='button' onClick={() => setCompareIds([])} className='text-xs font-semibold text-white/60 hover:text-white px-3 py-2'>
+                Clear
+              </button>
+              <button type='button' onClick={() => setComparisonOpen((open) => !open)} className='text-xs font-bold text-gray-950 bg-[#EF9F27] hover:bg-[#d98f20] px-4 py-2 rounded-xl'>
+                {comparisonOpen ? 'Hide comparison' : 'Compare now'}
+              </button>
+            </div>
+          </div>
+          {comparisonOpen && (
+            <div className='grid grid-cols-1 sm:grid-cols-3 border-t border-white/10 bg-gray-900'>
+              {comparedDevices.map((device) => (
+                <div key={device.id} className='p-4 border-b sm:border-b-0 sm:border-r border-white/10 last:border-0'>
+                  <div className='flex justify-between gap-3'>
+                    <p className='text-sm font-bold line-clamp-1'>{device.title}</p>
+                    <button type='button' onClick={() => toggleCompare(device.id)} aria-label={`Remove ${device.title}`} className='text-white/50 hover:text-white'>
+                      <X className='w-4 h-4' />
+                    </button>
+                  </div>
+                  <p className='text-xl font-black text-[#EF9F27] mt-2'>${device.current_price}</p>
+                  <div className='mt-3 space-y-1.5 text-xs text-white/70'>
+                    <p className='flex justify-between gap-2'><span>Condition</span><strong className='text-white'>{device.condition}</strong></p>
+                    <p className='flex justify-between gap-2'><span>Trust score</span><strong className='text-white'>{device.trustScore ?? 100}/100</strong></p>
+                    <p className='flex justify-between gap-2'><span>Battery</span><strong className='text-white'>{device.batteryHealth ?? 100}%</strong></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <Footer />
     </>

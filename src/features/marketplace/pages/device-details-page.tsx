@@ -7,6 +7,12 @@ import {
   RefreshCw,
   CreditCard,
   ShoppingCart,
+  BadgeCheck,
+  BatteryCharging,
+  Leaf,
+  Sparkles,
+  Wrench,
+  CircleCheck,
 } from 'lucide-react';
 import { useCart } from '../../../context/useCart';
 import { Link } from "react-router-dom";
@@ -27,8 +33,6 @@ export default function DeviceDetailsPage() {
   useEffect(() => {
     if (!id) return;
     let alive = true;
-    setIsLoading(true);
-    setError('');
     getMarketplaceListing(id)
       .then((item) => {
         if (alive) setDevice(item);
@@ -61,6 +65,10 @@ export default function DeviceDetailsPage() {
     0,
   );
   const totalSavings = device.original_price - device.current_price;
+  const trustScore = device.trustScore ?? 100;
+  const certificationDate = device.certifiedAt
+    ? new Date(device.certifiedAt).toLocaleDateString()
+    : 'Verified before listing';
 
   return (
     <>
@@ -136,6 +144,50 @@ export default function DeviceDetailsPage() {
                     </p>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Digital passport */}
+            <div className='mt-6 rounded-2xl overflow-hidden border border-[#127058]/20 bg-[#f4fbf8]'>
+              <div className='px-5 py-4 bg-[#127058] text-white flex items-start justify-between gap-4'>
+                <div className='flex items-center gap-3'>
+                  <BadgeCheck size={21} />
+                  <div>
+                    <h3 className='text-sm font-black'>Device Digital Passport</h3>
+                    <p className='text-[11px] text-white/70 mt-0.5'>Certified refurbishment record</p>
+                  </div>
+                </div>
+                <span className='bg-white/15 px-2.5 py-1 rounded-full text-[11px] font-black'>{trustScore}/100 TRUST</span>
+              </div>
+              <div className='grid grid-cols-2 gap-px bg-[#127058]/10'>
+                {[
+                  { label: 'Certification', value: device.certificationDetails ?? 'Certified refurbished', icon: CircleCheck },
+                  { label: 'Battery health', value: `${device.batteryHealth ?? 100}% tested`, icon: BatteryCharging },
+                  { label: 'Repair history', value: 'Diagnostics and QC passed', icon: Wrench },
+                  { label: 'Certified', value: certificationDate, icon: Shield },
+                ].map(({ label, value, icon: Icon }) => (
+                  <div key={label} className='bg-[#f4fbf8] px-4 py-3'>
+                    <Icon className='w-4 h-4 text-[#127058] mb-1.5' />
+                    <p className='text-[10px] font-black uppercase tracking-wider text-gray-400'>{label}</p>
+                    <p className='text-xs font-bold text-gray-800 mt-0.5'>{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* AI financing assistant */}
+            <div className='mt-6 bg-[#fff8eb] border border-[#EF9F27]/35 rounded-2xl p-5'>
+              <div className='flex items-start gap-3'>
+                <div className='w-9 h-9 rounded-xl bg-[#EF9F27] flex items-center justify-center text-gray-950 flex-shrink-0'>
+                  <Sparkles className='w-4 h-4' />
+                </div>
+                <div>
+                  <h3 className='text-sm font-black text-gray-900'>AI financing guidance</h3>
+                  <p className='text-xs text-gray-600 leading-relaxed mt-1'>
+                    Based on this device price, the {financingMonths}-month plan keeps your estimated payment at
+                    <strong className='text-gray-900'> ${monthlyInstallment}/month</strong>. Final approval remains with a finance officer.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -215,6 +267,15 @@ export default function DeviceDetailsPage() {
                   30-Day Returns
                 </span>
               </div>
+            </div>
+
+            <div className='mt-4 flex flex-wrap gap-2 text-[11px] font-bold text-emerald-800'>
+              <span className='inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-emerald-50 border border-emerald-100'>
+                <Leaf className='w-3.5 h-3.5' /> {device.eWasteSavedKg ?? 0} kg e-waste avoided
+              </span>
+              <span className='inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-emerald-50 border border-emerald-100'>
+                <Leaf className='w-3.5 h-3.5' /> {device.carbonSavedKg ?? 0} kg carbon impact reduced
+              </span>
             </div>
           </div>
         </div>

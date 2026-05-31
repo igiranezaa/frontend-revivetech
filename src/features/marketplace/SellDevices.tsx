@@ -24,6 +24,8 @@ import {
   Info,
   Banknote,
   Shield,
+  Sparkles,
+  ShoppingBag,
 } from 'lucide-react';
 import Navbar from '../../shared/components/nav';
 import Footer from '../../shared/components/Footer';
@@ -114,6 +116,7 @@ interface FormData {
   phone: string;
   location: string;
   preferredContact: string;
+  payoutPreference: string;
 }
 
 const INITIAL_FORM: FormData = {
@@ -122,6 +125,7 @@ const INITIAL_FORM: FormData = {
   accessories: [], condition: '', defects: '', askingPrice: '',
   images: [], name: '', email: '', phone: '', location: '',
   preferredContact: 'email',
+  payoutPreference: 'cash',
 };
 
 const ACCESSORY_OPTIONS = [
@@ -448,6 +452,32 @@ function Step4({ data, set }: { data: FormData; set: (k: keyof FormData, v: stri
         </div>
       </Field>
 
+      <Field label='How would you like to use your trade-in value?'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+          {[
+            { id: 'cash', label: 'Cash payout', desc: 'Receive your approved offer after inspection.', icon: Banknote },
+            { id: 'credit', label: 'Store credit', desc: 'Apply the value as a discount on your next device.', icon: ShoppingBag },
+          ].map(({ id, label, desc, icon: Icon }) => (
+            <button
+              key={id}
+              type='button'
+              onClick={() => set('payoutPreference', id)}
+              className={`flex items-start gap-3 p-4 rounded-2xl text-left border-2 transition-all ${
+                data.payoutPreference === id
+                  ? 'border-[#127058] bg-[#127058]/5'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <Icon className={`w-5 h-5 mt-0.5 ${data.payoutPreference === id ? 'text-[#127058]' : 'text-gray-400'}`} />
+              <span>
+                <span className='block text-sm font-bold text-gray-800'>{label}</span>
+                <span className='block text-xs text-gray-500 mt-0.5 leading-relaxed'>{desc}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </Field>
+
       <div className='bg-[#127058]/5 border border-[#127058]/20 rounded-2xl p-4 flex gap-3'>
         <Shield className='w-5 h-5 text-[#127058] flex-shrink-0 mt-0.5' />
         <div>
@@ -466,6 +496,12 @@ function Step5({ data, images }: { data: FormData; images: File[] }) {
   const condition = CONDITIONS.find((c) => c.id === data.condition);
   const category  = CATEGORIES.find((c) => c.id === data.category);
   const Icon      = category?.icon ?? Smartphone;
+  const conditionFactor = { Excellent: 1, Good: 0.9, Fair: 0.74, Poor: 0.48 }[data.condition] ?? 0.85;
+  const batteryFactor = data.batteryHealth ? Math.max(0.72, Number(data.batteryHealth) / 100) : 0.88;
+  const askingPrice = Number(data.askingPrice) || 0;
+  const aiEstimate = Math.round(askingPrice * conditionFactor * batteryFactor);
+  const estimateLow = Math.round(aiEstimate * 0.94);
+  const estimateHigh = Math.round(aiEstimate * 1.06);
 
   const rows = [
     { label: 'Device Type',   value: data.category    },
@@ -483,6 +519,7 @@ function Step5({ data, images }: { data: FormData; images: File[] }) {
     { label: 'Phone',         value: data.phone       },
     { label: 'Email',         value: data.email       },
     { label: 'Location',      value: data.location    },
+    { label: 'Payout',        value: data.payoutPreference === 'credit' ? 'Store credit discount' : 'Cash payout' },
   ].filter((r) => r.value);
 
   return (
@@ -521,6 +558,21 @@ function Step5({ data, images }: { data: FormData; images: File[] }) {
             <span className='text-sm text-gray-900 font-semibold text-right max-w-[55%] truncate'>{row.value}</span>
           </div>
         ))}
+      </div>
+
+      <div className='rounded-2xl border border-[#EF9F27]/40 bg-[#fff8eb] p-5'>
+        <div className='flex items-start gap-3'>
+          <div className='w-10 h-10 rounded-xl bg-[#EF9F27] text-gray-950 flex items-center justify-center flex-shrink-0'>
+            <Sparkles className='w-5 h-5' />
+          </div>
+          <div>
+            <p className='text-xs font-black uppercase tracking-wider text-amber-700'>AI-assisted instant valuation</p>
+            <p className='text-2xl font-black text-gray-950 mt-1'>${estimateLow} - ${estimateHigh}</p>
+            <p className='text-xs text-gray-600 mt-1 leading-relaxed'>
+              Suggested from condition, battery health, and your device details. A technician confirms the final offer after inspection.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Images preview */}

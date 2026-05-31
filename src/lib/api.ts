@@ -103,6 +103,12 @@ export function mapListing(listing: ApiMarketplaceListing): Listing {
       { label: 'Condition', value: condition },
       { label: 'Trust Score', value: `${device?.trustScore ?? 100}/100` },
     ],
+    trustScore: device?.trustScore ?? 100,
+    batteryHealth: device?.batteryHealth ?? 100,
+    eWasteSavedKg: device?.eWasteSavedKg ?? 0,
+    carbonSavedKg: device?.carbonSavedKg ?? 0,
+    certificationDetails: device?.passport?.certificationDetails ?? 'Certified refurbished device',
+    certifiedAt: device?.passport?.certifiedAt,
   };
 }
 

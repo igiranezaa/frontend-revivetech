@@ -27,4 +27,10 @@ export interface Listing {
   specs: Spec[];
   rating?: number;       // 1–5 star rating
   reviewCount?: number;  // number of reviews
+  trustScore?: number;
+  batteryHealth?: number;
+  eWasteSavedKg?: number;
+  carbonSavedKg?: number;
+  certificationDetails?: string;
+  certifiedAt?: string;
 }
