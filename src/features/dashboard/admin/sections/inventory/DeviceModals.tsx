@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Device } from '../../../shared/types/dashboard.types'
 import ModalBase from '../../../shared/components/ModalBase'
 import { getStockClass, getStockStatus, INV_CATEGORIES, INV_CONDITIONS, INV_WAREHOUSES } from './inventoryHelpers'
+import { getApiErrorMessage } from '../../../../../lib/api'
 
 interface ViewProps  { device: Device; onClose: () => void }
 interface EditProps  { device: Device; onClose: () => void; onSave: (d: Device) => void }
@@ -87,7 +88,7 @@ export function AddDeviceModal({ onClose, onSave }: AddProps) {
       })
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not add this device.')
+      setError(getApiErrorMessage(err, 'Could not add this device.'))
     } finally {
       setSaving(false)
     }
