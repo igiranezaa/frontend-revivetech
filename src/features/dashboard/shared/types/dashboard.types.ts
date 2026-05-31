@@ -37,12 +37,17 @@ export interface User {
 // ─── Inventory ────────────────────────────────────────────────────────────────
 export interface Device {
   sku: string;
+  id?: string;
+  brand?: string;
   model: string;
   category: string;
   condition: string;
   warehouse: string;
   listPrice: number;
   stock: number;
+  basePrice?: number;
+  batteryHealth?: number;
+  originalSerialNumber?: string;
 }
 
 // ─── Pricing ─────────────────────────────────────────────────────────────────

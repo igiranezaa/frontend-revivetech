@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { DashboardNotification, User } from '../features/dashboard/shared/types/dashboard.types';
+import type { DashboardNotification, Device, User } from '../features/dashboard/shared/types/dashboard.types';
 import type { Listing } from '../features/marketplace/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5001';
@@ -43,6 +43,11 @@ export interface ApiDevice {
     certificationDetails?: string | null;
     certifiedAt?: string;
   } | null;
+  originalSerialNumber?: string | null;
+  basePrice?: number;
+  price?: number;
+  warehouse?: string;
+  stock?: number;
 }
 
 export interface ApiMarketplaceListing {
@@ -128,6 +133,47 @@ export async function getMarketplaceListings(params?: {
 export async function getMarketplaceListing(id: string) {
   const { data } = await api.get<{ listing: ApiMarketplaceListing }>(`/api/marketplace/${id}`);
   return mapListing(data.listing);
+}
+
+function inventoryCategory(device: ApiDevice) {
+  return categoryFromDevice(device).replace('Smartwatch', 'Wearable');
+}
+
+function mapInventoryDevice(device: ApiDevice): Device {
+  return {
+    id: device.id,
+    sku: device.originalSerialNumber || device.id,
+    brand: device.brand,
+    model: `${device.brand} ${device.model}`.trim(),
+    category: inventoryCategory(device),
+    condition: titleCase(device.condition),
+    warehouse: device.warehouse ?? 'Kigali Central',
+    listPrice: Number(device.price ?? 0),
+    basePrice: Number(device.basePrice ?? 0),
+    batteryHealth: device.batteryHealth ?? 100,
+    originalSerialNumber: device.originalSerialNumber ?? '',
+    stock: device.stock ?? 1,
+  };
+}
+
+export async function getAdminDevices() {
+  const { data } = await api.get<{ devices: ApiDevice[] }>('/api/devices');
+  return data.devices.map(mapInventoryDevice);
+}
+
+export async function createAdminDevice(input: {
+  brand: string;
+  model: string;
+  originalSerialNumber?: string;
+  condition: string;
+  batteryHealth: number;
+  basePrice: number;
+  price: number;
+  warehouse: string;
+  stock: number;
+}) {
+  const { data } = await api.post<{ device: ApiDevice }>('/api/devices/intake', input);
+  return mapInventoryDevice(data.device);
 }
 
 interface ApiNotification {

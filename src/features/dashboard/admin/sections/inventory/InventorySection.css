@@ -1,4 +1,10 @@
 /* ── Inventory table cells ──────────────────────────────────────────── */
+.inv-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 20px 0; }
+.inv-panel-heading h2 { margin: 0; color: #111827; font-size: 18px; }
+.inv-panel-heading p { margin: 4px 0 0; color: #94a3b8; font-size: 13px; }
+.inv-add-device-btn { display: inline-flex; align-items: center; gap: 7px; border: none; border-radius: 8px; background: #025c50; color: #fff; padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background 0.18s ease, transform 0.18s ease; }
+.inv-add-device-btn:hover { background: #01493f; transform: translateY(-1px); }
+.inv-form-error { margin: 12px 20px 0; border: 1px solid #fecaca; border-radius: 8px; background: #fef2f2; color: #b91c1c; padding: 10px 12px; font-size: 13px; }
 .inv-sku   { font-size: 11px; color: #b0b8c4; font-family: 'SF Mono', Consolas, monospace; letter-spacing: 0.02em; }
 .inv-model { font-weight: 600; font-size: 13.5px; color: #111827; }
 .inv-stock-cell  { display: flex; flex-direction: column; gap: 5px; min-width: 110px; }
@@ -33,6 +39,8 @@
 
 /* ── Dark mode ──────────────────────────────────────────────────────── */
 [data-theme="dark"] .inv-model { color: #f1f5f9; }
+[data-theme="dark"] .inv-panel-heading h2 { color: #f1f5f9; }
+[data-theme="dark"] .inv-form-error { border-color: #7f1d1d; background: rgba(127,29,29,0.2); color: #fecaca; }
 [data-theme="dark"] .inv-sku   { color: #64748b; }
 [data-theme="dark"] .inv-stock-units { color: #e2e8f0; }
 [data-theme="dark"] .inv-stock-track { background: #334155; }
@@ -41,3 +49,8 @@
 [data-theme="dark"] .inv-adj-btn:hover { background: #243447; }
 [data-theme="dark"] .inv-adj-input { background: #1e293b; border-color: #334155; color: #f1f5f9; }
 [data-theme="dark"] .inv-adj-big  { color: #f1f5f9; }
+
+@media (max-width: 640px) {
+  .inv-panel-heading { align-items: stretch; flex-direction: column; }
+  .inv-add-device-btn { justify-content: center; }
+}

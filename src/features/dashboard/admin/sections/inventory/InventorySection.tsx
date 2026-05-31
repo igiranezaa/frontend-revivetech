@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DEVICES_SEED } from '../../../../../data/mockData'
 import type { Device } from '../../../shared/types/dashboard.types'
+import { createAdminDevice, getAdminDevices, getApiErrorMessage } from '../../../../../lib/api'
 import Pagination from '../../../shared/components/Pagination'
-import { DeviceViewModal, DeviceEditModal, AdjustStockModal } from './DeviceModals'
+import { AddDeviceModal, DeviceViewModal, DeviceEditModal, AdjustStockModal } from './DeviceModals'
 import { getStockStatus, INV_CATEGORIES, INV_WAREHOUSES, PAGE_SIZE } from './inventoryHelpers'
 import '../../../shared/styles/dashboard-shared.css'
 import './InventorySection.css'
@@ -19,9 +20,23 @@ export default function InventorySection() {
   const [viewDev, setViewDev]     = useState<Device | null>(null)
   const [editDev, setEditDev]     = useState<Device | null>(null)
   const [adjDev, setAdjDev]       = useState<Device | null>(null)
+  const [showAdd, setShowAdd]     = useState(false)
+  const [loadError, setLoadError] = useState('')
+
+  useEffect(() => {
+    getAdminDevices()
+      .then(setDevices)
+      .catch((error) => setLoadError(getApiErrorMessage(error, 'Could not load database inventory.')))
+  }, [])
 
   const handleSave = (updated: Device) =>
     setDevices((prev) => prev.map((d) => d.sku === updated.sku ? updated : d))
+
+  async function handleAdd(input: Parameters<typeof createAdminDevice>[0]) {
+    const device = await createAdminDevice(input)
+    setDevices((prev) => [device, ...prev])
+    setLoadError('')
+  }
 
   const counts = useMemo(() => ({
     total:   devices.reduce((s, d) => s + d.stock, 0),
@@ -29,7 +44,7 @@ export default function InventorySection() {
     atRisk:  devices.filter((d) => d.stock <= 10).length,
   }), [devices])
 
-  const maxStock = useMemo(() => Math.max(...devices.map((d) => d.stock)), [devices])
+  const maxStock = useMemo(() => Math.max(1, ...devices.map((d) => d.stock)), [devices])
 
   const filtered = useMemo(() => {
     type DeviceWithStatus = Device & { status: string }
@@ -61,9 +76,9 @@ export default function InventorySection() {
     setPage(1)
   }
 
-  const SortIcon = ({ k }: { k: string }) => (
-    <span className={`inv-sort-icon ${sortKey === k ? 'inv-sort-icon--active' : ''}`}>
-      {sortKey === k ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}
+  const sortIcon = (key: string) => (
+    <span className={`inv-sort-icon ${sortKey === key ? 'inv-sort-icon--active' : ''}`}>
+      {sortKey === key ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}
     </span>
   )
 
@@ -92,6 +107,19 @@ export default function InventorySection() {
       </section>
 
       <article className="panel-card">
+        <div className="inv-panel-heading">
+          <div>
+            <h2>Inventory Records</h2>
+            <p>Register device intake and monitor stock from one workspace.</p>
+          </div>
+          <button type="button" className="inv-add-device-btn" onClick={() => setShowAdd(true)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Device
+          </button>
+        </div>
+        {loadError && <div className="inv-form-error" role="alert">{loadError}</div>}
         <div className="um-toolbar">
           <div className="search-field search-field--compact">
             <svg className="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -127,9 +155,9 @@ export default function InventorySection() {
             <thead>
               <tr>
                 <th>SKU</th>
-                <th><button type="button" className="inv-sort-btn" onClick={() => handleSort('model')}>Model <SortIcon k="model" /></button></th>
+                <th><button type="button" className="inv-sort-btn" onClick={() => handleSort('model')}>Model {sortIcon('model')}</button></th>
                 <th>Category</th>
-                <th><button type="button" className="inv-sort-btn" onClick={() => handleSort('stock')}>Stock <SortIcon k="stock" /></button></th>
+                <th><button type="button" className="inv-sort-btn" onClick={() => handleSort('stock')}>Stock {sortIcon('stock')}</button></th>
                 <th>Warehouse</th><th>Condition</th><th>Actions</th>
               </tr>
             </thead>
@@ -180,6 +208,7 @@ export default function InventorySection() {
       {viewDev && <DeviceViewModal device={viewDev} onClose={() => setViewDev(null)} />}
       {editDev && <DeviceEditModal device={editDev} onClose={() => setEditDev(null)} onSave={handleSave} />}
       {adjDev  && <AdjustStockModal device={adjDev} onClose={() => setAdjDev(null)} onSave={handleSave} />}
+      {showAdd && <AddDeviceModal onClose={() => setShowAdd(false)} onSave={handleAdd} />}
     </div>
   )
 }

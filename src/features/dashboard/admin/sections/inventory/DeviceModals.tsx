@@ -6,6 +6,121 @@ import { getStockClass, getStockStatus, INV_CATEGORIES, INV_CONDITIONS, INV_WARE
 interface ViewProps  { device: Device; onClose: () => void }
 interface EditProps  { device: Device; onClose: () => void; onSave: (d: Device) => void }
 interface AdjProps   { device: Device; onClose: () => void; onSave: (d: Device) => void }
+interface AddProps {
+  onClose: () => void
+  onSave: (input: {
+    brand: string
+    model: string
+    originalSerialNumber?: string
+    condition: string
+    batteryHealth: number
+    basePrice: number
+    price: number
+    warehouse: string
+    stock: number
+  }) => Promise<void>
+}
+
+export function AddDeviceModal({ onClose, onSave }: AddProps) {
+  const [form, setForm] = useState({
+    brand: '',
+    model: '',
+    originalSerialNumber: '',
+    condition: 'GOOD',
+    batteryHealth: '100',
+    basePrice: '',
+    price: '',
+    warehouse: INV_WAREHOUSES[0],
+    stock: '1',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm((current) => ({ ...current, [key]: e.target.value }))
+
+  async function handleSave() {
+    if (!form.brand.trim() || !form.model.trim() || !form.basePrice || !form.price) {
+      setError('Brand, model, acquisition cost, and selling price are required.')
+      return
+    }
+    setSaving(true)
+    setError('')
+    try {
+      await onSave({
+        brand: form.brand.trim(),
+        model: form.model.trim(),
+        originalSerialNumber: form.originalSerialNumber.trim() || undefined,
+        condition: form.condition,
+        batteryHealth: Number(form.batteryHealth),
+        basePrice: Number(form.basePrice),
+        price: Number(form.price),
+        warehouse: form.warehouse,
+        stock: Number(form.stock),
+      })
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not add this device.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <ModalBase title="Add Device to Inventory" onClose={onClose} footer={
+      <>
+        <button type="button" className="um-btn-secondary" onClick={onClose}>Cancel</button>
+        <button type="button" className="um-btn-primary" onClick={handleSave} disabled={saving}>
+          {saving ? 'Adding...' : 'Add Device'}
+        </button>
+      </>
+    }>
+      <p className="um-form-note">Register a device intake record. It will be saved to the database immediately.</p>
+      {error && <div className="inv-form-error" role="alert">{error}</div>}
+      <div className="um-form-grid">
+        <label className="um-form-field">
+          <span className="um-form-label">Brand</span>
+          <input className="um-form-input" value={form.brand} onChange={set('brand')} placeholder="e.g. Apple" />
+        </label>
+        <label className="um-form-field">
+          <span className="um-form-label">Model</span>
+          <input className="um-form-input" value={form.model} onChange={set('model')} placeholder="e.g. iPhone 14 Pro" />
+        </label>
+        <label className="um-form-field" style={{ gridColumn: '1 / -1' }}>
+          <span className="um-form-label">Serial Number</span>
+          <input className="um-form-input" value={form.originalSerialNumber} onChange={set('originalSerialNumber')} placeholder="Optional device serial number" />
+        </label>
+        <label className="um-form-field">
+          <span className="um-form-label">Condition</span>
+          <select className="um-form-input" value={form.condition} onChange={set('condition')}>
+            {['NEW', 'EXCELLENT', 'GOOD', 'FAIR', 'POOR'].map((condition) => <option key={condition}>{condition}</option>)}
+          </select>
+        </label>
+        <label className="um-form-field">
+          <span className="um-form-label">Battery Health (%)</span>
+          <input className="um-form-input" type="number" min="1" max="100" value={form.batteryHealth} onChange={set('batteryHealth')} />
+        </label>
+        <label className="um-form-field">
+          <span className="um-form-label">Warehouse</span>
+          <select className="um-form-input" value={form.warehouse} onChange={set('warehouse')}>
+            {INV_WAREHOUSES.map((warehouse) => <option key={warehouse}>{warehouse}</option>)}
+          </select>
+        </label>
+        <label className="um-form-field">
+          <span className="um-form-label">Initial Stock</span>
+          <input className="um-form-input" type="number" min="0" step="1" value={form.stock} onChange={set('stock')} />
+        </label>
+        <label className="um-form-field">
+          <span className="um-form-label">Acquisition Cost ($)</span>
+          <input className="um-form-input" type="number" min="0" step="0.01" value={form.basePrice} onChange={set('basePrice')} placeholder="0.00" />
+        </label>
+        <label className="um-form-field">
+          <span className="um-form-label">Selling Price ($)</span>
+          <input className="um-form-input" type="number" min="0" step="0.01" value={form.price} onChange={set('price')} placeholder="0.00" />
+        </label>
+      </div>
+    </ModalBase>
+  )
+}
 
 export function DeviceViewModal({ device, onClose }: ViewProps) {
   return (
