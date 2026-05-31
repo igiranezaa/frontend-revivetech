@@ -220,6 +220,10 @@ export async function getAdminUsers(): Promise<User[]> {
   }));
 }
 
+export async function deleteAdminUser(id: string) {
+  await api.delete(`/api/users/admin/users/${id}`);
+}
+
 export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong. Please try again.') {
   if (axios.isAxiosError(error)) {
     const message = error.response?.data?.message ?? error.response?.data?.error;

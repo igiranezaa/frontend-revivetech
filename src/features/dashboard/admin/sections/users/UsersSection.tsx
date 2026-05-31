@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { User } from '../../../shared/types/dashboard.types'
-import { getAdminUsers } from '../../../../../lib/api'
+import { deleteAdminUser, getAdminUsers, getApiErrorMessage } from '../../../../../lib/api'
 import Pagination from '../../../shared/components/Pagination'
 import UserViewModal from './UserViewModal'
 import UserEditModal from './UserEditModal'
@@ -19,6 +19,8 @@ export default function UsersSection() {
   const [users, setUsers]               = useState<User[]>([])
   const [viewUser, setViewUser]         = useState<User | null>(null)
   const [editUser, setEditUser]         = useState<User | null>(null)
+  const [deletingId, setDeletingId]     = useState<string | null>(null)
+  const [deleteError, setDeleteError]   = useState('')
 
   const handleSave = (updated: User) =>
     setUsers((prev) => prev.map((u) => u.id === updated.id ? updated : u))
@@ -58,6 +60,24 @@ export default function UsersSection() {
 
   const toggleStatus = (id: string) =>
     setUsers((prev) => prev.map((u) => u.id === id ? { ...u, status: u.status === 'Active' ? 'Deactivated' : 'Active' } : u))
+
+  async function handleDelete(user: User) {
+    const confirmed = window.confirm(`Delete ${user.name} (${user.email})? This action cannot be undone.`)
+    if (!confirmed) return
+
+    setDeletingId(user.id)
+    setDeleteError('')
+    try {
+      await deleteAdminUser(user.id)
+      setUsers((prev) => prev.filter((item) => item.id !== user.id))
+      if (viewUser?.id === user.id) setViewUser(null)
+      if (editUser?.id === user.id) setEditUser(null)
+    } catch (error) {
+      setDeleteError(getApiErrorMessage(error, 'Could not delete this user. Please try again.'))
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   const kpis = [
     {
@@ -100,6 +120,12 @@ export default function UsersSection() {
       </section>
 
       <article className="panel-card">
+        {deleteError && (
+          <div className="um-error-banner" role="alert">
+            <span>{deleteError}</span>
+            <button type="button" onClick={() => setDeleteError('')} aria-label="Dismiss error">×</button>
+          </div>
+        )}
         <div className="um-toolbar">
           <div className="search-field search-field--compact">
             <svg className="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -170,6 +196,17 @@ export default function UsersSection() {
                           ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>Deactivate</span></>
                           : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span>Activate</span></>
                         }
+                      </button>
+                      <button
+                        type="button"
+                        className="um-action-btn um-action-delete"
+                        onClick={() => handleDelete(user)}
+                        disabled={deletingId === user.id}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                        </svg>
+                        <span>{deletingId === user.id ? 'Deleting...' : 'Delete'}</span>
                       </button>
                     </div>
                   </td>

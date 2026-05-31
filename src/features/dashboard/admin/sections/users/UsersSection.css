@@ -1,6 +1,52 @@
 /* Users section uses shared um-* classes from dashboard-shared.css */
 /* Only section-specific overrides here */
 
+.um-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.um-error-banner button {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.um-action-delete {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  color: #ffffff;
+}
+
+.um-action-delete:hover:not(:disabled) {
+  background: #991b1b;
+  border-color: #991b1b;
+}
+
+.um-action-btn:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+[data-theme="dark"] .um-error-banner {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(127, 29, 29, 0.35);
+  color: #fecaca;
+}
+
 .inv-view-hero {
   display: flex;
   align-items: center;
