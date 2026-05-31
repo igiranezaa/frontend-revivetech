@@ -48,6 +48,7 @@ export interface Device {
   basePrice?: number;
   batteryHealth?: number;
   originalSerialNumber?: string;
+  imageUrl?: string;
 }
 
 // ─── Pricing ─────────────────────────────────────────────────────────────────

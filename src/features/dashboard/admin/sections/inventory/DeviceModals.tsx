@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Device } from '../../../shared/types/dashboard.types'
 import ModalBase from '../../../shared/components/ModalBase'
 import { getStockClass, getStockStatus, INV_CATEGORIES, INV_CONDITIONS, INV_WAREHOUSES } from './inventoryHelpers'
@@ -18,6 +18,7 @@ interface AddProps {
     price: number
     warehouse: string
     stock: number
+    image: File
   }) => Promise<void>
 }
 
@@ -35,12 +36,38 @@ export function AddDeviceModal({ onClose, onSave }: AddProps) {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [image, setImage] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState('')
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((current) => ({ ...current, [key]: e.target.value }))
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError('Choose a JPG, PNG, or WebP image.')
+      e.target.value = ''
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('The device picture must be smaller than 5 MB.')
+      e.target.value = ''
+      return
+    }
+    setError('')
+    setImage(file)
+    setPreviewUrl(URL.createObjectURL(file))
+  }
+
   async function handleSave() {
-    if (!form.brand.trim() || !form.model.trim() || !form.basePrice || !form.price) {
-      setError('Brand, model, acquisition cost, and selling price are required.')
+    if (!form.brand.trim() || !form.model.trim() || !form.basePrice || !form.price || !image) {
+      setError('Picture, brand, model, acquisition cost, and selling price are required.')
       return
     }
     setSaving(true)
@@ -56,6 +83,7 @@ export function AddDeviceModal({ onClose, onSave }: AddProps) {
         price: Number(form.price),
         warehouse: form.warehouse,
         stock: Number(form.stock),
+        image,
       })
       onClose()
     } catch (err) {
@@ -77,6 +105,21 @@ export function AddDeviceModal({ onClose, onSave }: AddProps) {
       <p className="um-form-note">Register a device intake record. It will be saved to the database immediately.</p>
       {error && <div className="inv-form-error" role="alert">{error}</div>}
       <div className="um-form-grid">
+        <label className="inv-upload-field">
+          <span className="um-form-label">Device Picture</span>
+          <input className="inv-upload-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageChange} />
+          <span className={`inv-upload-box ${previewUrl ? 'inv-upload-box--filled' : ''}`}>
+            {previewUrl ? (
+              <img className="inv-upload-preview" src={previewUrl} alt="Selected device preview" />
+            ) : (
+              <>
+                <span className="inv-upload-icon">+</span>
+                <strong>Upload a clear product photo</strong>
+                <small>JPG, PNG, or WebP. Maximum 5 MB.</small>
+              </>
+            )}
+          </span>
+        </label>
         <label className="um-form-field">
           <span className="um-form-label">Brand</span>
           <input className="um-form-input" value={form.brand} onChange={set('brand')} placeholder="e.g. Apple" />
@@ -128,10 +171,12 @@ export function DeviceViewModal({ device, onClose }: ViewProps) {
       <button type="button" className="um-btn-secondary" onClick={onClose}>Close</button>
     }>
       <div className="inv-view-hero">
-        <div className="inv-view-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          </svg>
+        <div className={`inv-view-icon ${device.imageUrl ? 'inv-view-icon--image' : ''}`}>
+          {device.imageUrl ? <img src={device.imageUrl} alt="" /> : (
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+          )}
         </div>
         <div>
           <p className="inv-view-model">{device.model}</p>

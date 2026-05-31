@@ -48,6 +48,7 @@ export interface ApiDevice {
   price?: number;
   warehouse?: string;
   stock?: number;
+  imageUrl?: string | null;
 }
 
 export interface ApiMarketplaceListing {
@@ -95,7 +96,7 @@ export function mapListing(listing: ApiMarketplaceListing): Listing {
     title: listing.title || `${device?.brand ?? ''} ${device?.model ?? ''}`.trim() || 'Refurbished Device',
     current_price: currentPrice,
     original_price: Math.max(basePrice, currentPrice),
-    img: DEVICE_PLACEHOLDER,
+    img: device?.imageUrl || DEVICE_PLACEHOLDER,
     category: categoryFromDevice(device) as Listing['category'],
     condition,
     rating: device?.trustScore ? Math.max(1, Math.min(5, Math.round(device.trustScore / 20))) : 4,
@@ -153,6 +154,7 @@ function mapInventoryDevice(device: ApiDevice): Device {
     batteryHealth: device.batteryHealth ?? 100,
     originalSerialNumber: device.originalSerialNumber ?? '',
     stock: device.stock ?? 1,
+    imageUrl: device.imageUrl ?? undefined,
   };
 }
 
@@ -171,8 +173,13 @@ export async function createAdminDevice(input: {
   price: number;
   warehouse: string;
   stock: number;
+  image: File;
 }) {
-  const { data } = await api.post<{ device: ApiDevice }>('/api/devices/intake', input);
+  const formData = new FormData();
+  Object.entries(input).forEach(([key, value]) => formData.append(key, value instanceof File ? value : String(value)));
+  const { data } = await api.post<{ device: ApiDevice }>('/api/devices/intake', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return mapInventoryDevice(data.device);
 }
 

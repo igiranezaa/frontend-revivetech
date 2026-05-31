@@ -5,6 +5,15 @@
 .inv-add-device-btn { display: inline-flex; align-items: center; gap: 7px; border: none; border-radius: 8px; background: #025c50; color: #fff; padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background 0.18s ease, transform 0.18s ease; }
 .inv-add-device-btn:hover { background: #01493f; transform: translateY(-1px); }
 .inv-form-error { margin: 12px 20px 0; border: 1px solid #fecaca; border-radius: 8px; background: #fef2f2; color: #b91c1c; padding: 10px 12px; font-size: 13px; }
+.inv-upload-field { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 7px; cursor: pointer; }
+.inv-upload-input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.inv-upload-box { min-height: 128px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 1.5px dashed #b6c8c5; border-radius: 11px; background: #f8fbfa; color: #31635d; text-align: center; overflow: hidden; transition: border-color 0.18s ease, background 0.18s ease; }
+.inv-upload-box:hover { border-color: #025c50; background: #f1f8f7; }
+.inv-upload-box--filled { border-style: solid; }
+.inv-upload-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: #e1f0ee; color: #025c50; font-size: 22px; line-height: 1; }
+.inv-upload-box strong { font-size: 13px; }
+.inv-upload-box small { color: #7c9692; font-size: 11px; }
+.inv-upload-preview { width: 100%; height: 160px; display: block; object-fit: cover; }
 .inv-sku   { font-size: 11px; color: #b0b8c4; font-family: 'SF Mono', Consolas, monospace; letter-spacing: 0.02em; }
 .inv-model { font-weight: 600; font-size: 13.5px; color: #111827; }
 .inv-stock-cell  { display: flex; flex-direction: column; gap: 5px; min-width: 110px; }
@@ -20,6 +29,8 @@
 /* ── Device view modal hero ────────────────────────────────────────── */
 .inv-view-hero { display: flex; align-items: center; gap: 14px; padding: 4px 0 8px; }
 .inv-view-icon { width: 52px; height: 52px; border-radius: 12px; background: rgba(2,92,80,0.08); color: #025c50; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.inv-view-icon--image { overflow: hidden; }
+.inv-view-icon--image img { width: 100%; height: 100%; object-fit: cover; }
 .inv-view-model { font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 3px; }
 .inv-view-sku   { font-size: 12px; color: #94a3b8; margin: 0; font-family: monospace; }
 
@@ -41,6 +52,8 @@
 [data-theme="dark"] .inv-model { color: #f1f5f9; }
 [data-theme="dark"] .inv-panel-heading h2 { color: #f1f5f9; }
 [data-theme="dark"] .inv-form-error { border-color: #7f1d1d; background: rgba(127,29,29,0.2); color: #fecaca; }
+[data-theme="dark"] .inv-upload-box { border-color: #475569; background: #172235; color: #cbd5e1; }
+[data-theme="dark"] .inv-upload-box:hover { border-color: #5eead4; background: #1b2d3a; }
 [data-theme="dark"] .inv-sku   { color: #64748b; }
 [data-theme="dark"] .inv-stock-units { color: #e2e8f0; }
 [data-theme="dark"] .inv-stock-track { background: #334155; }
