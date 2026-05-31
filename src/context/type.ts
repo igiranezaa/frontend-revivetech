@@ -30,6 +30,7 @@ export interface CartContextType {
   cart: CartItem[];
   addToCart: (device: Device) => void;
   removeFromCart: (id: string) => void;
+  clearCart: () => void;
   // 🟢 New control signatures:
   updateQuantity: (id: string, delta: number) => void;
   cartCount: number;

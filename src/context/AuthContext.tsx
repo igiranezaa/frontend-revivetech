@@ -46,6 +46,8 @@ function mapUser(user: ApiUser): AuthUser {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const CART_STORAGE_KEY = 'jaribu_cart';
+const CART_CLEARED_EVENT = 'revivetech:cart-cleared';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
@@ -78,6 +80,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
+    const currentToken = sessionStorage.getItem('auth_token');
+    if (currentToken) {
+      api.delete('/api/marketplace/cart', {
+        headers: { Authorization: `Bearer ${currentToken}` },
+      }).catch(() => undefined);
+    }
+    localStorage.removeItem(CART_STORAGE_KEY);
+    window.dispatchEvent(new Event(CART_CLEARED_EVENT));
     sessionStorage.removeItem('auth_user');
     sessionStorage.removeItem('auth_token');
     setUser(null);

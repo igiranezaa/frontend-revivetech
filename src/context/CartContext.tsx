@@ -3,12 +3,13 @@ import type { ReactNode } from 'react';
 import type { Device, CartItem, ToastState } from './type';
 import  { CartContext } from './type';
 
-
+const CART_STORAGE_KEY = 'jaribu_cart';
+const CART_CLEARED_EVENT = 'revivetech:cart-cleared';
 
 export function CartProvider({ children }: { children: ReactNode }) {
   // 📦 Local Storage Hydration on Initial Load
   const [cart, setCart] = useState<CartItem[]>(() => {
-    const savedCart = localStorage.getItem('jaribu_cart');
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY);
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
@@ -17,8 +18,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // 💾 Sync Cart State Changes to LocalStorage Automatically
   useEffect(() => {
-    localStorage.setItem('jaribu_cart', JSON.stringify(cart));
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
   }, [cart]);
+
+  useEffect(() => {
+    const handleCartCleared = () => {
+      setCart([]);
+      setIsCartOpen(false);
+    };
+    window.addEventListener(CART_CLEARED_EVENT, handleCartCleared);
+    return () => window.removeEventListener(CART_CLEARED_EVENT, handleCartCleared);
+  }, []);
 
   // 🔔 Triggers a 3-second self-dismissing toast animation banner
   const triggerToast = (message: string) => {
@@ -48,6 +58,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart((prevCart) => prevCart.filter((item) => item.id !== id));
   };
 
+  const clearCart = () => {
+    setCart([]);
+    setIsCartOpen(false);
+  };
+
   // ➕/➖ Adjust quantities with a safety limit stopping subtraction below 1 item
   const updateQuantity = (id: string, delta: number) => {
     setCart((prevCart) =>
@@ -67,6 +82,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         cart,
         addToCart,
         removeFromCart,
+        clearCart,
         updateQuantity,
         cartCount,
         cartTotal,
