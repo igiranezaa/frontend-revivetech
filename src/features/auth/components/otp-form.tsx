@@ -5,9 +5,8 @@ import { api, getApiErrorMessage } from '../../../lib/api';
 
 export default function VerifyOtpForm() {
   const [searchParams] = useSearchParams();
-  const initialOtp = searchParams.get('otp') ?? '';
   const [email, setEmail] = useState(searchParams.get('email') ?? '');
-  const [otp, setOtp] = useState<string[]>(initialOtp.length === 6 ? initialOtp.split('') : new Array(6).fill(''));
+  const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
   const [timer, setTimer] = useState<number>(59);
   const [isVerified, setIsVerified] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,10 +74,20 @@ export default function VerifyOtpForm() {
     }
   };
 
-  const handleResend = () => {
-    setOtp(new Array(6).fill(''));
-    setTimer(59);
-    inputRefs.current[0]?.focus();
+  const handleResend = async () => {
+    if (!email.trim()) return;
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await api.post('/api/auth/resend-verification-otp', { email: email.trim() });
+      setOtp(new Array(6).fill(''));
+      setTimer(59);
+      inputRefs.current[0]?.focus();
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Could not resend the code. Please try again.'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Success view block layout
@@ -168,6 +177,7 @@ export default function VerifyOtpForm() {
               <button
                 type='button'
                 onClick={handleResend}
+                disabled={isSubmitting}
                 className='text-[#ef9f27] hover:text-[#d68a1d] font-bold transition-colors focus:outline-none'
               >
                 Resend Code

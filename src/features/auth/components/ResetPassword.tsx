@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { Lock, Eye, EyeOff, CheckCircle2, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle2, ArrowRight, ShieldCheck, AlertCircle, Mail } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { api, getApiErrorMessage } from '../../../lib/api';
 
 export default function ResetPasswordForm() {
+  const [searchParams] = useSearchParams();
+  const [email, setEmail] = useState(searchParams.get('email') ?? '');
+  const [otpCode, setOtpCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Live validation checks for security
   const isMinLength = password.length >= 8;
@@ -16,11 +23,23 @@ export default function ResetPasswordForm() {
   // Confirm password matching rule
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (allRequirementsMet && passwordsMatch) {
-      // Connect your update password API endpoint here
-      setIsSuccess(true);
+      setError('');
+      setIsLoading(true);
+      try {
+        await api.post('/api/auth/reset-password', {
+          email: email.trim(),
+          otpCode: otpCode.trim(),
+          newPassword: password,
+        });
+        setIsSuccess(true);
+      } catch (err) {
+        setError(getApiErrorMessage(err, 'Could not reset your password. Please check the code and try again.'));
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -65,6 +84,28 @@ export default function ResetPasswordForm() {
         </div>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
+          {error && (
+            <div className='p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium'>
+              {error}
+            </div>
+          )}
+
+          <div className='space-y-1.5'>
+            <label className='text-sm font-semibold text-gray-700 block'>Email address</label>
+            <div className='relative flex items-center'>
+              <span className='absolute left-3.5 text-gray-400'><Mail size={18} /></span>
+              <input type='email' value={email} onChange={(e) => setEmail(e.target.value)} required
+                className='w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:border-[#127058] focus:bg-white focus:ring-2 focus:ring-[#127058]/10 transition-all' />
+            </div>
+          </div>
+
+          <div className='space-y-1.5'>
+            <label className='text-sm font-semibold text-gray-700 block'>Reset code</label>
+            <input type='text' inputMode='numeric' maxLength={6} value={otpCode}
+              onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} required
+              placeholder='Enter the 6-digit email code'
+              className='w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:border-[#127058] focus:bg-white focus:ring-2 focus:ring-[#127058]/10 transition-all' />
+          </div>
           
           {/* New Password Field */}
           <div className='space-y-1.5'>
@@ -152,10 +193,10 @@ export default function ResetPasswordForm() {
           {/* Submission Button - Disabled until requirements are fully clear */}
           <button
             type='submit'
-            disabled={!allRequirementsMet || !passwordsMatch}
+            disabled={!allRequirementsMet || !passwordsMatch || otpCode.length !== 6 || !email.trim() || isLoading}
             className='w-full !mt-6 bg-[#127058] hover:bg-[#0e5845] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-all text-sm shadow-sm'
           >
-            Update Security Credentials
+            {isLoading ? 'Updating...' : 'Update Security Credentials'}
           </button>
         </form>
 

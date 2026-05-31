@@ -1,14 +1,25 @@
 import { useState } from 'react';
 import { ArrowLeft, Mail, CheckCircle2 } from 'lucide-react';
+import { api, getApiErrorMessage } from '../../../lib/api';
 
 export default function ForgetPasswordForm() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add API logic here
-    setIsSubmitted(true);
+    setError('');
+    setIsLoading(true);
+    try {
+      await api.post('/api/auth/forgot-password', { email: email.trim() });
+      setIsSubmitted(true);
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Could not send the reset code. Please try again.'));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Success State View
@@ -24,21 +35,17 @@ export default function ForgetPasswordForm() {
               Check your email
             </h1>
             <p className='text-sm text-gray-500 leading-relaxed'>
-              We have sent a secure password reset link to{' '}
+              We have sent a secure password reset code to{' '}
               <span className='font-semibold text-gray-900'>{email}</span>.
             </p>
           </div>
           <div className='pt-2'>
-            <button
-              onClick={() => setIsSubmitted(false)}
-              className='text-sm font-semibold text-[#127058] hover:text-[#0e5845] transition-colors flex items-center justify-center gap-2 mx-auto group'
+            <a
+              href={`/ResetPassword?email=${encodeURIComponent(email)}`}
+              className='w-full inline-flex items-center justify-center gap-2 bg-[#127058] hover:bg-[#0e5845] text-white font-semibold py-3 px-4 rounded-xl transition-colors text-sm'
             >
-              <ArrowLeft
-                size={16}
-                className='transform group-hover:-translate-x-0.5 transition-transform'
-              />
-              <span>Resend email link</span>
-            </button>
+              Enter reset code
+            </a>
           </div>
         </div>
       </div>
@@ -61,6 +68,11 @@ export default function ForgetPasswordForm() {
         </div>
 
         <form onSubmit={handleSubmit} className='space-y-4'>
+          {error && (
+            <div className='p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium'>
+              {error}
+            </div>
+          )}
           {/* Email Field Wrapper */}
           <div className='space-y-1.5'>
             <label className='text-sm font-semibold text-gray-700 block'>
@@ -84,9 +96,10 @@ export default function ForgetPasswordForm() {
           {/* Submit Button using custom orange color #ef9f27 */}
           <button
             type='submit'
+            disabled={isLoading}
             className='w-full !mt-6 bg-[#ef9f27] hover:bg-[#d68a1d] text-white font-semibold py-3 px-4 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 group shadow-sm'
           >
-            <span>Send Reset Link</span>
+            <span>{isLoading ? 'Sending...' : 'Send Reset Code'}</span>
           </button>
         </form>
 

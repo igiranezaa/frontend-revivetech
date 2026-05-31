@@ -24,7 +24,6 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
 
   // Live validation checks
   const isMinLength = password.length >= 8;
@@ -47,7 +46,7 @@ export default function RegisterForm() {
 
     try {
       const [firstName, ...rest] = fullName.trim().split(/\s+/);
-      const { data } = await api.post<{ otpCode?: string }>('/api/auth/register', {
+      await api.post('/api/auth/register', {
         firstName,
         lastName: rest.join(' ') || firstName,
         email: email.trim(),
@@ -55,7 +54,6 @@ export default function RegisterForm() {
         password,
         role: 'CUSTOMER',
       });
-      setOtpCode(data.otpCode ?? '');
       setSuccess(true);
     } catch (err) {
       setError(getApiErrorMessage(err, 'Registration failed. Please try again.'));
@@ -79,13 +77,8 @@ export default function RegisterForm() {
             We sent a verification code to{' '}
             <span className='font-semibold text-gray-700'>{email}</span>.
           </p>
-          {otpCode && (
-            <div className='rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800'>
-              Test OTP: <span className='font-black tracking-widest'>{otpCode}</span>
-            </div>
-          )}
           <a
-            href={`/VerifyOtpForm?email=${encodeURIComponent(email)}${otpCode ? `&otp=${otpCode}` : ''}`}
+            href={`/VerifyOtpForm?email=${encodeURIComponent(email)}`}
             className='inline-flex w-full items-center justify-center bg-[#127058] hover:bg-[#0e5845] text-white font-semibold py-3 px-4 rounded-xl transition-colors text-sm'
           >
             Verify Account
