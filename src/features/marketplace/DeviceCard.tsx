@@ -1,20 +1,32 @@
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react"; 
+import { ArrowRight, BatteryMedium, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Listing } from "./types";
 import { getMarketplaceListings } from "../../lib/api";
+import "./DeviceCard.css";
+
+function conditionClass(condition: string) {
+  const value = condition.toLowerCase();
+  if (value === "excellent" || value === "new") return "home-device-condition--excellent";
+  if (value === "good") return "home-device-condition--good";
+  return "home-device-condition--fair";
+}
 
 export default function DeviceCard() {
   const [trendingListings, setTrendingListings] = useState<Listing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
     getMarketplaceListings()
       .then((items) => {
-        if (alive) setTrendingListings(items.slice(0, 4));
+        if (alive) setTrendingListings(items.slice(0, 6));
       })
       .catch(() => {
         if (alive) setTrendingListings([]);
+      })
+      .finally(() => {
+        if (alive) setIsLoading(false);
       });
     return () => {
       alive = false;
@@ -22,82 +34,77 @@ export default function DeviceCard() {
   }, []);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
+    <section className="home-device-section" aria-labelledby="trending-devices-title">
+      <div className="home-device-heading">
         <div>
-          <h3 className="text-3xl font-bold bg-gradient-to-r from-[#6E9F94] to-[#127058] bg-clip-text text-black">
-            Trending Devices
-          </h3>
-          <p className="text-gray-600 mt-1 font-medium">
-            Certified by our expert technicians
+          <p className="home-device-eyebrow">
+            <span />
+            Curated inventory
           </p>
+          <h2 id="trending-devices-title">Trending Devices</h2>
+          <p>Certified refurbished technology, priced for everyday ownership.</p>
         </div>
 
-        <Link 
-          to="/marketplace" 
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-[#127058] hover:text-[#0e5845] transition-colors group"
-        >
-          <span>View All Marketplace</span>
-          <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+        <Link to="/marketplace" className="home-device-marketplace-link">
+          Explore all devices
+          <ArrowRight size={16} />
         </Link>
       </div>
 
-      {trendingListings.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center">
-          <p className="text-sm font-semibold text-gray-500">No database listings are active yet.</p>
+      {isLoading ? (
+        <div className="home-device-grid" aria-label="Loading featured devices">
+          {Array.from({ length: 4 }, (_, index) => (
+            <div className="home-device-skeleton" key={index} />
+          ))}
+        </div>
+      ) : trendingListings.length === 0 ? (
+        <div className="home-device-empty">
+          <ShieldCheck size={22} />
+          <p>No certified listings are active yet.</p>
         </div>
       ) : (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {trendingListings.map((device) => (
-          <div 
-            key={device.id} 
-            className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow bg-white flex flex-col"
-          >
-            {/* Image Container */}
-            <div className="relative h-48 w-full bg-gray-50 flex items-center justify-center overflow-hidden">
-              <img 
-                src={device.img} 
-                alt={device.title} 
-                className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
-              />
-              
-              {/* Category Badge using your custom orange color (#ef9f27) */}
-              <span className="absolute top-3 left-3 bg-[#ef9f27] text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm capitalize">
-                {device.category}
-              </span>
-            </div>
+        <div className="home-device-grid">
+          {trendingListings.map((device) => {
+            const monthlyPrice = Math.ceil(device.current_price / 12);
 
-            {/* Device Details */}
-            <div className="p-4 flex flex-col flex-grow">
-              <h4 className="font-bold text-gray-800 text-lg line-clamp-1 mb-2">
-                {device.title}
-              </h4>
-              
-              {/* Pricing section with installment context */}
-              <div className="flex items-baseline gap-2 mb-4 mt-auto">
-                <span className="text-xl font-extrabold text-gray-900">
-                  ${device.current_price}
-                </span>
-                <span className="text-sm text-gray-400 line-through">
-                  ${device.original_price}
-                </span>
-                <span className="text-xs text-emerald-600 font-medium ml-auto bg-emerald-50 px-2 py-0.5 rounded">
-                  From ${(device.current_price / 12).toFixed(0)}/mo
-                </span>
-              </div>
+            return (
+              <article className="home-device-card" key={device.id}>
+                <Link to={`/marketplace/${device.id}`} className="home-device-image-wrap" aria-label={`View ${device.title}`}>
+                  <img src={device.img} alt={device.title} loading="lazy" />
+                  <span className="home-device-category">{device.category}</span>
+                  <span className={`home-device-condition ${conditionClass(device.condition)}`}>
+                    <CheckCircle2 size={11} />
+                    {device.condition}
+                  </span>
+                </Link>
 
-              <Link 
-                to={`/marketplace/${device.id}`}
-                className="w-full bg-[#127058] hover:bg-[#0e5845] text-white font-semibold py-2.5 px-4 rounded-xl transition-colors text-sm shadow-sm text-center block"
-              >
-                View Details
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
+                <div className="home-device-body">
+                  <div>
+                    <h3>{device.title}</h3>
+                    <div className="home-device-meta">
+                      <span><BatteryMedium size={14} />{device.batteryHealth ?? 100}% battery</span>
+                      <span><ShieldCheck size={14} />{device.trustScore ?? 100} trust</span>
+                    </div>
+                  </div>
+
+                  <div className="home-device-price-row">
+                    <div>
+                      <strong>${device.current_price.toLocaleString()}</strong>
+                      <del>${device.original_price.toLocaleString()}</del>
+                    </div>
+                    <span>From ${monthlyPrice}/mo</span>
+                  </div>
+
+                  <Link to={`/marketplace/${device.id}`} className="home-device-details-link">
+                    View details
+                    <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       )}
-    </div>
+    </section>
   );
 }
