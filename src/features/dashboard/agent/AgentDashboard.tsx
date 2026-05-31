@@ -21,6 +21,7 @@ const ICONS = {
   tickets:  ['M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z', 'M14 2v6h6', 'M16 13H8', 'M16 17H8', 'M10 9H8'],
   chat:     'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
   profile:  ['M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2', 'M12 11m-4 0a4 4 0 1 0 8 0 4 4 0 0 0-8 0'],
+  home:     ['M3 11l9-8 9 8', 'M5 10v10h14V10', 'M9 20v-6h6v6'],
   bell:     ['M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9', 'M13.73 21a2 2 0 0 1-3.46 0'],
   moon:     'M21 12.8A8.5 8.5 0 1 1 11.2 3 6.7 6.7 0 0 0 21 12.8z',
   sun:      ['M12 1v2', 'M12 21v2', 'M4.22 4.22l1.42 1.42', 'M18.36 18.36l1.42 1.42', 'M1 12h2', 'M21 12h2', 'M4.22 19.78l1.42-1.42', 'M18.36 5.64l1.42-1.42', 'M12 7m-5 0a5 5 0 1 0 10 0 5 5 0 0 0-10 0'],
@@ -321,14 +322,11 @@ function ActiveChatsSection({
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const liveTicket = selected ? getTicketById(selected.id) ?? selected : null
+  const liveTicketId = liveTicket?.id
 
   useEffect(() => {
-    if (initialTicket) setSelected(initialTicket)
-  }, [initialTicket])
-
-  useEffect(() => {
-    if (liveTicket) markReadByAgent(liveTicket.id)
-  }, [liveTicket?.id, markReadByAgent])
+    if (liveTicketId) markReadByAgent(liveTicketId)
+  }, [liveTicketId, markReadByAgent])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -724,6 +722,11 @@ export default function AgentDashboard() {
 
         <p className="agent-sidebar-caption">Customer experience &amp; support</p>
 
+        <button type="button" className="agent-home-btn" onClick={() => navigate('/')}>
+          <Icon d={ICONS.home} size={15} />
+          <span>Home</span>
+        </button>
+
         <nav className="agent-nav">
           {(Object.entries(TAB_CONFIG) as [AgentTab, typeof TAB_CONFIG[AgentTab]][]).map(([id, cfg]) => (
             <button
@@ -763,7 +766,7 @@ export default function AgentDashboard() {
         <div className="agent-content">
           {activeTab === 'overview' && <OverviewSection tickets={tickets} />}
           {activeTab === 'tickets'  && <TicketsSection tickets={tickets} onOpenChat={handleOpenChat} />}
-          {activeTab === 'chats'    && <ActiveChatsSection tickets={tickets} initialTicket={chatTicket} />}
+          {activeTab === 'chats'    && <ActiveChatsSection key={chatTicket?.id ?? 'active-chats'} tickets={tickets} initialTicket={chatTicket} />}
           {activeTab === 'profile'  && <ProfileSection />}
         </div>
       </main>

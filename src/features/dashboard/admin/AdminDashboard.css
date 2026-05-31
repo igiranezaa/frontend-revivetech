@@ -37,6 +37,14 @@
 }
 .brand p { margin: 2px 0 0; opacity: 0.8; font-size: 12px; }
 .sidebar-caption { margin: -8px 0 4px; padding: 0 4px; font-size: 11px; line-height: 1.4; opacity: 0.75; }
+.dashboard-home-btn {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 10px 14px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+  background: rgba(255,255,255,0.08); color: #ffffff;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.dashboard-home-btn:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.36); }
 
 .menu { display: grid; gap: 8px; }
 .menu button {

@@ -100,6 +100,27 @@
   opacity: 0.65;
 }
 
+.agent-home-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 10px;
+  background: rgba(255,255,255,.08);
+  color: #ffffff;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.agent-home-btn:hover {
+  background: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.36);
+}
+
 .agent-nav {
   display: flex;
   flex-direction: column;

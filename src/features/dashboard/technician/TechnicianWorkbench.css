@@ -10,6 +10,8 @@
   z-index: 10; box-shadow: 2px 0 16px rgba(2,92,80,0.18);
 }
 .tw-sidebar-caption { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); padding: 0 6px 8px; margin: 0; }
+.tw-home-btn { display: flex; align-items: center; gap: 9px; width: 100%; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 10px 14px; background: rgba(255,255,255,0.08); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; transition: background 0.15s, border-color 0.15s; }
+.tw-home-btn:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.36); }
 .tw-sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
 .tw-nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; border: none; border-radius: 10px; padding: 11px 14px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.82); background: transparent; cursor: pointer; text-align: left; transition: background 0.15s, color 0.15s; }
 .tw-nav-btn:hover:not(.active) { background: rgba(255,255,255,0.08); }

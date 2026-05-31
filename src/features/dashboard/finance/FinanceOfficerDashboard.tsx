@@ -23,7 +23,7 @@ interface Props {
   onMarkNotifRead?: (id: string) => void
 }
 
-export default function FinanceOfficerDashboard({ onBack: _onBack, darkMode = false, onToggleDark, notifications = [], onMarkNotifRead }: Props) {
+export default function FinanceOfficerDashboard({ darkMode = false, onToggleDark, notifications = [], onMarkNotifRead }: Props) {
   const navigate = useNavigate()
   const [page, setPage]           = useState('overview')
   const [profilePic, setProfilePic] = useState<string | null>(null)
@@ -73,6 +73,12 @@ export default function FinanceOfficerDashboard({ onBack: _onBack, darkMode = fa
           <div><strong>reviveTech</strong><p>Finance Portal</p></div>
         </button>
         <p className="fo-sidebar-caption">Loan management &amp; risk monitoring</p>
+        <button type="button" className="fo-home-btn" onClick={() => navigate('/')}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
+            <path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>
+          </svg>
+          <span>Home</span>
+        </button>
         <nav className="fo-nav">
           <FoSidebar page={page} setPage={setPage} />
         </nav>
