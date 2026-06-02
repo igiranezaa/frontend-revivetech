@@ -14,7 +14,8 @@ import { api, getApiErrorMessage } from '../../../lib/api';
 
 export default function RegisterForm() {
   // Input fields state
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -45,10 +46,9 @@ export default function RegisterForm() {
     setIsLoading(true);
 
     try {
-      const [firstName, ...rest] = fullName.trim().split(/\s+/);
       await api.post('/api/auth/register', {
-        firstName,
-        lastName: rest.join(' ') || firstName,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         email: email.trim(),
         phone: phone.trim(),
         password,
@@ -112,24 +112,45 @@ export default function RegisterForm() {
 
         <form onSubmit={handleSubmit} className='space-y-4'>
 
-          {/* ── Name Field ───────────────────────────────────────────────── */}
-          <div className='space-y-1.5'>
-            <label className='text-sm font-semibold text-gray-700 block'>
-              Full Name
-            </label>
-            <div className='relative flex items-center'>
-              <span className='absolute left-3.5 text-gray-400'>
-                <User size={18} />
-              </span>
-              <input
-                type='text'
-                placeholder='John Doe'
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                disabled={isLoading}
-                className='w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#127058] focus:bg-white focus:ring-2 focus:ring-[#127058]/10 transition-all disabled:opacity-60 disabled:cursor-not-allowed'
-              />
+          {/* ── Name Fields ──────────────────────────────────────────────── */}
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+            <div className='space-y-1.5'>
+              <label className='text-sm font-semibold text-gray-700 block'>
+                First Name
+              </label>
+              <div className='relative flex items-center'>
+                <span className='absolute left-3.5 text-gray-400'>
+                  <User size={18} />
+                </span>
+                <input
+                  type='text'
+                  placeholder='John'
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className='w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#127058] focus:bg-white focus:ring-2 focus:ring-[#127058]/10 transition-all disabled:opacity-60 disabled:cursor-not-allowed'
+                />
+              </div>
+            </div>
+            <div className='space-y-1.5'>
+              <label className='text-sm font-semibold text-gray-700 block'>
+                Last Name
+              </label>
+              <div className='relative flex items-center'>
+                <span className='absolute left-3.5 text-gray-400'>
+                  <User size={18} />
+                </span>
+                <input
+                  type='text'
+                  placeholder='Doe'
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className='w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#127058] focus:bg-white focus:ring-2 focus:ring-[#127058]/10 transition-all disabled:opacity-60 disabled:cursor-not-allowed'
+                />
+              </div>
             </div>
           </div>
 
