@@ -36,7 +36,7 @@ export default function HeroSection() {
 
       <main className='w-full px-0 py-3 md:py-4'>
         {/* Parent Card Container with Relative Positioning */}
-        <div className='relative overflow-hidden p-4 sm:p-6 md:px-10 text-white min-h-[210px] md:min-h-[230px] flex items-center shadow-xl'>
+        <div className='relative overflow-hidden rounded-b-3xl p-4 sm:p-6 md:px-10 text-white min-h-[210px] md:min-h-[230px] flex items-center shadow-xl'>
           {/* Background Image Layer */}
           <div className='absolute inset-0 z-0'>
             <img
