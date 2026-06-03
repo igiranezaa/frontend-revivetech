@@ -34,9 +34,9 @@ export default function HeroSection() {
     <>
       <Navbar />
 
-      <main className='max-w-7xl mx-auto px-6 py-8'>
+      <main className='max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-6'>
         {/* Parent Card Container with Relative Positioning */}
-        <div className='relative overflow-hidden p-8 md:p-16 text-white rounded-3xl min-h-[480px] flex items-center shadow-xl'>
+        <div className='relative overflow-hidden p-6 sm:p-8 md:p-10 text-white rounded-3xl min-h-[340px] md:min-h-[380px] flex items-center shadow-xl'>
           {/* Background Image Layer */}
           <div className='absolute inset-0 z-0'>
             <img
@@ -53,26 +53,26 @@ export default function HeroSection() {
           <div className='absolute inset-0 z-10 bg-gradient-to-r from-black/50 via-transparent to-transparent'></div>
 
           {/* Foreground Content Layer */}
-          <div className='relative z-20 flex flex-col items-start space-y-5 max-w-2xl'>
+          <div className='relative z-20 flex flex-col items-start space-y-4 max-w-2xl'>
             <span className='inline-block bg-[#EF9F27] text-gray-950 text-xs font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-md'>
               Quality Devices. Flexible Payments.
             </span>
 
-            <h1 className='text-4xl md:text-6xl font-black text-white tracking-tight leading-tight mt-2'>
+            <h1 className='text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mt-1'>
               Affordable tech,{' '}
               <span className='text-[#EF9F27]'>fairly priced.</span>
               <br />
               No compromise.
             </h1>
 
-            <p className='text-[#D5E4E1] text-base md:text-lg leading-relaxed max-w-lg drop-shadow-sm'>
+            <p className='text-[#D5E4E1] text-sm md:text-base leading-relaxed max-w-lg drop-shadow-sm'>
               ReviveTech is a platform for buying and selling professionally
               refurbished electronics with transparent condition grading,
               AI-powered pricing, and flexible monthly payment plans — making
               quality devices accessible to everyone.
             </p>
 
-            <div className='flex flex-wrap gap-3 mt-8'>
+            <div className='flex flex-wrap gap-3 mt-4'>
               <Link
                 to='/marketplace'
                 className='inline-flex items-center gap-2 bg-[#EF9F27] hover:bg-[#d98f20] text-gray-950 font-bold px-6 py-3 rounded-full transition-all shadow-lg shadow-[#EF9F27]/20 active:scale-[0.97]'
