@@ -143,11 +143,11 @@ export default function Navbar() {
     <>
       <nav className='bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex items-center h-16 gap-4'>
+          <div className='grid grid-cols-[auto_1fr_auto] items-center h-16 gap-5 lg:gap-8'>
             {/* ── Brand ──────────────────────────────────────────────────── */}
             <Link
               to='/'
-              className='text-2xl font-black tracking-tight text-gray-950 hover:opacity-75 transition-opacity flex-shrink-0'
+              className='text-2xl font-black tracking-tight text-gray-950 hover:opacity-75 transition-opacity whitespace-nowrap'
             >
               ReviveTech
             </Link>
@@ -155,7 +155,7 @@ export default function Navbar() {
             {/* ── Search Bar ─────────────────────────────────────────────── */}
             <div
               ref={searchRef}
-              className='relative flex-1 max-w-md mx-auto hidden sm:block'
+              className='relative w-full max-w-lg justify-self-center hidden sm:block'
             >
               <form onSubmit={handleSearchSubmit}>
                 <div className='relative group'>
@@ -287,20 +287,21 @@ export default function Navbar() {
             </div>
 
             {/* ── Desktop Nav Links ───────────────────────────────────────── */}
-            <div className='hidden md:flex items-center gap-1 ml-2'>
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.path}
-                  className='text-sm font-semibold text-gray-900  hover:bg-gray-200 px-3 py-2 rounded-xl transition-all'
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-
             {/* ── Right Actions ───────────────────────────────────────────── */}
-            <div className='flex items-center gap-1 ml-auto'>
+            <div className='flex items-center justify-end gap-2 lg:gap-3 whitespace-nowrap'>
+              {/* Desktop Nav Links */}
+              <div className='hidden md:flex items-center gap-2'>
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.label}
+                    to={link.path}
+                    className='text-sm font-bold text-gray-900 hover:text-[#127058] hover:bg-[#127058]/8 px-3.5 py-2 rounded-xl transition-all'
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+
               {/* Mobile search icon */}
               <button
                 className='sm:hidden p-2.5 text-gray-600 hover:text-gray-950 hover:bg-gray-100 rounded-xl transition-colors'
@@ -325,7 +326,7 @@ export default function Navbar() {
               </button>
 
               {/* Divider */}
-              <div className='h-5 w-px bg-gray-200 mx-1 hidden md:block' />
+              <div className='h-5 w-px bg-gray-200 hidden md:block' />
 
               {/* Desktop auth — shows chip when logged in, Sign In when not */}
               <div className='hidden md:flex items-center gap-2'>
