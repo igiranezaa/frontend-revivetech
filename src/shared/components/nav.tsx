@@ -288,14 +288,14 @@ export default function Navbar() {
 
             {/* ── Desktop Nav Links ───────────────────────────────────────── */}
             {/* ── Right Actions ───────────────────────────────────────────── */}
-            <div className='flex items-center justify-end gap-2 lg:gap-3 whitespace-nowrap'>
+            <div className='flex items-center justify-end gap-1.5 whitespace-nowrap'>
               {/* Desktop Nav Links */}
-              <div className='hidden md:flex items-center gap-2'>
+              <div className='hidden md:flex items-center'>
                 {NAV_LINKS.map((link) => (
                   <Link
                     key={link.label}
                     to={link.path}
-                    className='text-sm font-bold text-gray-900 hover:text-[#127058] hover:bg-[#127058]/8 px-3.5 py-2 rounded-xl transition-all'
+                    className='text-sm font-bold text-gray-900 hover:text-[#127058] hover:bg-[#127058]/8 px-3 py-2 rounded-xl transition-all'
                   >
                     {link.label}
                   </Link>
@@ -326,7 +326,7 @@ export default function Navbar() {
               </button>
 
               {/* Divider */}
-              <div className='h-5 w-px bg-gray-200 hidden md:block' />
+              <div className='h-5 w-px bg-gray-200 mx-1 hidden md:block' />
 
               {/* Desktop auth — shows chip when logged in, Sign In when not */}
               <div className='hidden md:flex items-center gap-2'>
